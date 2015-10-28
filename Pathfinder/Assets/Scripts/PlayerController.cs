@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class PlayerController : MonoBehaviour {
+	public Sprite[] movementSprites;
 
 	public int skillPoints;
 	public float maxSpeed;
@@ -14,20 +15,22 @@ public class PlayerController : MonoBehaviour {
 	public float liftPower;
 	public float glideSpeed; //multiplicative
 	public float flightTime;
-	float currentFlightTime;
+	public float currentFlightTime;
 	public float glideTime;
-	float currentGlideTime;
+	public float currentGlideTime;
 
 	//[HideInInspector]
-	public bool isGroundLeft, isGroundRight, jumping;
+	public bool isGroundLeft, isGroundRight;
 
 	public bool leftDown, rightDown;
-	bool canFly, canDigDown, canDigLeft, canDigRight;
+	public bool canFly, canDigDown, canDigLeft, canDigRight;
 	GameObject objectToDig;
 	Rigidbody2D playerRigidbody;
+	SpriteRenderer sprite;
 	// Use this for initialization
 	void Start () {
 		playerRigidbody = GetComponent<Rigidbody2D>();
+		sprite = GetComponent<SpriteRenderer>();
 	}
 	
 	// Update is called once per frame
@@ -38,13 +41,15 @@ public class PlayerController : MonoBehaviour {
 	void FixedUpdate () {
 
 		if (isGrounded) 
-			playerRigidbody.gravityScale = 1;
-		else 
-			playerRigidbody.gravityScale = 5;
+			playerRigidbody.gravityScale = 2;
+		else {
+			playerRigidbody.gravityScale = 7;
+		}
 
 		// left right movement 
 		// -----------------------------------------------------------------------------------------
 		if (Input.GetKey (KeyCode.A) && !isGroundLeft) {
+			sprite.sprite = movementSprites[0];
 			leftDown = true;
 			rightDown = false;
 			if (currentSpeed >= -maxSpeed)
@@ -52,6 +57,7 @@ public class PlayerController : MonoBehaviour {
 
 			playerRigidbody.velocity = new Vector2(currentSpeed, playerRigidbody.velocity.y);
 		} else if (Input.GetKey (KeyCode.D) && !isGroundRight) {
+			sprite.sprite = movementSprites[1];
 			rightDown = true;
 			leftDown = false;
 			if (currentSpeed <= maxSpeed)
@@ -71,41 +77,40 @@ public class PlayerController : MonoBehaviour {
 
 		//flight movement
 		//-------------------------------------------------------------------------------------------
-//		if (Input.GetKey (KeyCode.Space) && canFly && currentFlightTime > 0f) {
-//			currentFlightTime -= Time.fixedDeltaTime;
-//			playerRigidbody.velocity += new Vector2(0, liftPower);
-//			playerRigidbody.gravityScale = 2f;
-//		}
-//
-//		if (Input.GetKey (KeyCode.Space) && currentFlightTime < 0 && currentGlideTime > 0f) {
-//			currentGlideTime -= Time.fixedDeltaTime;
-//			if (Input.GetKey (KeyCode.A)) {
-//				playerRigidbody.velocity = new Vector2 (currentSpeed * glideSpeed, playerRigidbody.velocity.y);
-//			} else if (Input.GetKey (KeyCode.D)) {
-//				playerRigidbody.velocity = new Vector2 (currentSpeed * glideSpeed, playerRigidbody.velocity.y);
-//			}
-//			playerRigidbody.gravityScale = .55f;
-//		}
+		if (skillPoints > 0) {
+			if (Input.GetKey (KeyCode.Space) && canFly && currentFlightTime > 0f) {
+				currentFlightTime -= Time.fixedDeltaTime;
+				playerRigidbody.velocity += new Vector2(0, liftPower);
+				playerRigidbody.gravityScale = 2f;
+			}
 
-		if (Input.GetKeyDown (KeyCode.Space) && isGrounded) {
-			Invoke("StartFly", .25f);
-			jumped = true;
+			if (Input.GetKey (KeyCode.Space) && currentFlightTime < 0 && currentGlideTime > 0f) {
+				currentGlideTime -= Time.fixedDeltaTime;
+				if (Input.GetKey (KeyCode.A)) {
+					playerRigidbody.velocity = new Vector2 (currentSpeed * glideSpeed, playerRigidbody.velocity.y);
+				} else if (Input.GetKey (KeyCode.D)) {
+					playerRigidbody.velocity = new Vector2 (currentSpeed * glideSpeed, playerRigidbody.velocity.y);
+				}
+				playerRigidbody.gravityScale = .55f;
+			}
 		}
-
-		if (jumped == true) {
-			playerRigidbody.velocity = Vector2.up * jumpPower;
-			jumped = false;
+		if (Input.GetKey (KeyCode.Space) && isGrounded && !jumped) {
+			jumped = true;
+			Invoke("StartFly", .15f);
+			playerRigidbody.velocity += Vector2.up * jumpPower;
 		}
 		//-------------------------------------------------------------------------------------------
 
 		//Digging Controls
 		//-------------------------------------------------------------------------------------------
-		if (Input.GetKeyDown (KeyCode.S) && canDigDown ) {
-			DigDown();
-		} else if (Input.GetKeyDown (KeyCode.A) && canDigLeft) {
-			DigLeft();
-		} else if (Input.GetKeyDown (KeyCode.D) && canDigRight) {
-			DigRight();
+		if (skillPoints > 1) {
+			if (Input.GetKeyDown (KeyCode.S) && canDigDown ) {
+				DigDown();
+			} else if (Input.GetKeyDown (KeyCode.A) && canDigLeft) {
+				DigLeft();
+			} else if (Input.GetKeyDown (KeyCode.D) && canDigRight) {
+				DigRight();
+			}
 		}
 		//-------------------------------------------------------------------------------------------
 
@@ -113,7 +118,6 @@ public class PlayerController : MonoBehaviour {
 
 	void StartFly () {
 		canFly = true;
-		jumped = false;
 	}
 
 	void DigDown () {
@@ -133,7 +137,9 @@ public class PlayerController : MonoBehaviour {
 		ContactPoint2D contact = col.contacts [0];
 		if (Vector3.Dot(contact.normal, Vector2.up) > .5f) {
 			isGrounded = true;
-			canFly = false;
+			if (!jumped) {
+				canFly = false;
+			}
 			jumped = false;
 			currentFlightTime = flightTime;
 			currentGlideTime = glideTime;
@@ -152,7 +158,10 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnCollisionExit2D (Collision2D col) {
-		Invoke ("LeftGround", .25f);
+		if (jumped) {
+			Invoke ("LeftGround",.15f);
+		} else 
+			Invoke ("LeftGround",.2f);
 		if (col.transform.tag == "BreakableTerrain") {
 			canDigDown = false;
 			canDigLeft = false; 
