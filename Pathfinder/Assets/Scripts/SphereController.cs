@@ -120,7 +120,8 @@ public class SphereController : MonoBehaviour {
 
 		//Debug.Log (desiredVelocity);
 
-		drawLevel (); drawDistances ();
+		//drawLevel (); 
+		//drawDistances ();
 
 		if(grounded2)
 		{
