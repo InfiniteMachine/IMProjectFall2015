@@ -4,6 +4,19 @@ using System.Collections;
 public class Platformer : MonoBehaviour {
 
 	[System.Serializable]
+	public class ScenePosition
+	{
+		public string scene;
+		public Vector3 pos;
+
+		public ScenePosition(string newScene, Vector3 newPos)
+		{
+			scene = newScene;
+			pos = newPos;
+		}
+	}
+
+	[System.Serializable]
 	public class Controller
 	{
 		public Stick[] sticks;

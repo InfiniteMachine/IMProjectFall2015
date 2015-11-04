@@ -47,6 +47,8 @@ public class SphereController : MonoBehaviour {
 	Vector3[] directions;
 	float[] distances;
 	float[] angles;
+	public bool debugBreakOnFall = false;
+	public bool active = true;
 	
 	// Use this for initialization
 	void Awake() {
@@ -71,6 +73,19 @@ public class SphereController : MonoBehaviour {
 
 	void Update ()
 	{
+		if (spacebar > 0)
+			spacebar += -1;
+		if (spacebarDown > 0)
+			spacebarDown += -1;
+
+		if(active)
+		{
+			if(Input.GetKey(KeyCode.Space))
+				spacebar = spacebarSet;
+			if(Input.GetKeyDown(KeyCode.Space))
+				spacebarDown = spacebarDownSet;
+		}
+
 		timeCount += Time.deltaTime;
 		if(timeCount>frameTime)
 		{
@@ -82,14 +97,6 @@ public class SphereController : MonoBehaviour {
 	// Update is called once per frame
 	void UpdateCall () {
 		//Debug.Log (velocity.magnitude);
-		if (spacebar > 0)
-			spacebar += -1;
-		if(Input.GetKey(KeyCode.Space))
-			spacebar = spacebarSet;
-		if (spacebarDown > 0)
-			spacebarDown += -1;
-		if(Input.GetKeyDown(KeyCode.Space))
-			spacebarDown = spacebarDownSet;
 
 		Vector3 startPosition = transform.position;
 		desiredVelocity = Vector3.zero;
@@ -98,7 +105,7 @@ public class SphereController : MonoBehaviour {
 
 		float lastGrip = findGrip (lastSmallestIndex);
 
-		if(lastGrip>0f)
+		/*if(lastGrip>0f)
 		{
 			float hor = horStick.returnThrottle();
 			if(hor<0f)
@@ -116,7 +123,7 @@ public class SphereController : MonoBehaviour {
 		{
 			// Get desired velocity for flying
 			desiredVelocity = new Vector3(horStick.returnThrottle() * 9999f, verStick.returnThrottle() * 9999f, 0f);
-		}
+		}*/
 
 		//Debug.Log (desiredVelocity);
 
@@ -150,11 +157,11 @@ public class SphereController : MonoBehaviour {
 			transform.position = startPosition;
 
 			float hor = horStick.returnThrottle();
-			if(hor<0f)
+			if(hor<0f && active)
 				desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
 				                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f)
 					* hor * walkVelocity;
-			else if(hor>0f)
+			else if(hor>0f && active)
 				desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
 				                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f)
 					* -hor * walkVelocity;
@@ -177,7 +184,7 @@ public class SphereController : MonoBehaviour {
 					velocity.y = gravityEffect;
 			}
 
-			if(spacebarDown>0 && grounded1 && nextJumpIndex<jumpset.Length())
+			if(spacebarDown>0 && grounded2 && nextJumpIndex<jumpset.Length())
 			{
 				// Jumping here
 				grounded1 = grounded2 = false;
@@ -202,11 +209,16 @@ public class SphereController : MonoBehaviour {
 		}
 		else // Not grounded // Falling
 		{
+			if(debugBreakOnFall)
+				Debug.Break();
 			gameObject.GetComponent<Renderer>().material.color = Color.red;
 			if(!(jumping && currentJump.hover))
 				velocity.y += gravityEffect;
 
 			desiredVelocity = new Vector3(horStick.returnThrottle() * flightVelocity, verStick.returnThrottle() * flightVelocity, 0f);
+			if(!active)
+				desiredVelocity = velocity;
+
 
 			if(jumping)
 			{
@@ -405,6 +417,17 @@ public class SphereController : MonoBehaviour {
 		return toReturn;
 	}
 
+	public void die(string cause = "none")
+	{
+		// Do death stuff
+		despawn ();
+	}
+
+	public void despawn()
+	{
+		GameObject.Destroy (gameObject);
+	}
+
 	public float returnRayLength(Vector3 position, Vector3 direction, float length = 9999f)
 	{
 		RaycastHit hit;
@@ -453,6 +476,4 @@ public class SphereController : MonoBehaviour {
 			               new Color(1f - (distances[x]/scalar), 0f, (distances[x]/scalar)),0f,false);
 		}
 	}
-
-
 }

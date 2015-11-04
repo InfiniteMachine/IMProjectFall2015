@@ -8,7 +8,7 @@ public class ParallaxScott : MonoBehaviour {
 	GameObject theplayer;
 	// Use this for initialization
 	void Start () {
-		theplayer = GameObject.FindGameObjectWithTag ("Player");
+		theplayer = GameObject.FindGameObjectWithTag ("MainCamera");
 		origin = transform.position.x;
 	}
 	
