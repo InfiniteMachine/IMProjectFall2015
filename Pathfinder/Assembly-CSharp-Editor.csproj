@@ -45,8 +45,31 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Editor\ImageEffects\BloomEditor.cs" />
+     <Compile Include="Assets\Editor\ImageEffects\TonemappingEditor.cs" />
      <Compile Include="Assets\Editor\uGUITools.cs" />
      <Compile Include="Assets\TechTree\Editor\NodeControllerInspector.cs" />
+     <None Include="Assets\Resources\ALSF2.txt" />
+     <None Include="Assets\Resources\ALSF1.txt" />
+     <None Include="Assets\SpriteLights\Shaders\lightFunctions.cginc" />
+     <None Include="Assets\SpriteLights\Shaders\omnidirectionalLight.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\RadialBlur.shader" />
+     <None Include="Assets\SpriteLights\Shaders\papiLight.shader" />
+     <None Include="Assets\Resources\SALS.txt" />
+     <None Include="Assets\SpriteLights\Manual\changelog.txt" />
+     <None Include="Assets\SpriteLights\Shaders\strobeLight.shader" />
+     <None Include="Assets\Resources\CALVERT1.txt" />
+     <None Include="Assets\Resources\CALVERT2.txt" />
+     <None Include="Assets\SpriteLights\Shaders\directionalLight.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\BlurEffectConeTaps.shader" />
+     <None Include="Assets\Resources\TDZ.txt" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BrightPassFilter2.shader" />
+     <None Include="Assets\SpriteLights\Shaders\debugLight.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\Tonemapper.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BrightPassFilter.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\LensFlareCreate.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BlurAndFlares.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BlendForBloom.shader" />
  <Reference Include="UnityEditor.Advertisements">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/Editor/UnityEditor.Advertisements.dll</HintPath>
  </Reference>
@@ -103,6 +126,8 @@
  </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
+      <Project>{1A3D69B8-CCB7-D98D-7AD6-EB3455E96DFE}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
     <ProjectReference Include="Assembly-CSharp.csproj">
       <Project>{816594AD-2910-C07D-D630-401BF951B16A}</Project>      <Name>Assembly-CSharp</Name>    </ProjectReference>
   </ItemGroup>

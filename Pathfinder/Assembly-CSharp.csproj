@@ -56,10 +56,38 @@
      <Compile Include="Assets\Scripts\ParallaxScott.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
      <Compile Include="Assets\Scripts\SlopeDetector.cs" />
+     <Compile Include="Assets\SpriteLights\Scripts\CityLights.cs" />
+     <Compile Include="Assets\SpriteLights\Scripts\LookAround.cs" />
+     <Compile Include="Assets\SpriteLights\Scripts\Math3d.cs" />
+     <Compile Include="Assets\SpriteLights\Scripts\RandomLights.cs" />
+     <Compile Include="Assets\SpriteLights\Scripts\ReferenceDistance.cs" />
+     <Compile Include="Assets\SpriteLights\Scripts\RunwayLights.cs" />
+     <Compile Include="Assets\SpriteLights\Scripts\SpriteLights.cs" />
      <Compile Include="Assets\TechTree\Scripts\DataController.cs" />
      <Compile Include="Assets\TechTree\Scripts\MouseHover.cs" />
      <Compile Include="Assets\TechTree\Scripts\NodeController.cs" />
      <Compile Include="Assets\TechTree\Scripts\NodeDataContainer.cs" />
+     <None Include="Assets\Resources\ALSF2.txt" />
+     <None Include="Assets\Resources\ALSF1.txt" />
+     <None Include="Assets\SpriteLights\Shaders\lightFunctions.cginc" />
+     <None Include="Assets\SpriteLights\Shaders\omnidirectionalLight.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\RadialBlur.shader" />
+     <None Include="Assets\SpriteLights\Shaders\papiLight.shader" />
+     <None Include="Assets\Resources\SALS.txt" />
+     <None Include="Assets\SpriteLights\Manual\changelog.txt" />
+     <None Include="Assets\SpriteLights\Shaders\strobeLight.shader" />
+     <None Include="Assets\Resources\CALVERT1.txt" />
+     <None Include="Assets\Resources\CALVERT2.txt" />
+     <None Include="Assets\SpriteLights\Shaders\directionalLight.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\BlurEffectConeTaps.shader" />
+     <None Include="Assets\Resources\TDZ.txt" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BrightPassFilter2.shader" />
+     <None Include="Assets\SpriteLights\Shaders\debugLight.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\Tonemapper.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BrightPassFilter.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\LensFlareCreate.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BlurAndFlares.shader" />
+     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\_BloomAndFlares\BlendForBloom.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
@@ -72,6 +100,10 @@
  <Reference Include="UnityEditor.iOS.Extensions.Xcode">
  <HintPath>C:/Program Files/Unity/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
  </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
+      <Project>{1A3D69B8-CCB7-D98D-7AD6-EB3455E96DFE}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
