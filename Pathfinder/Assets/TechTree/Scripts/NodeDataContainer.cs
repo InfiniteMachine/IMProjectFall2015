@@ -5,7 +5,7 @@ using System.Collections;
 public class NodeDataContainer : MonoBehaviour
 {
     private Transform parent;
-    public float animationDuration = 0.5f;
+    private float animationDuration = 0.5f;
     public string title = "Display Title";
     public string flavorText = "Flavor Text";
     public string flavorText2 = "";
@@ -26,6 +26,9 @@ public class NodeDataContainer : MonoBehaviour
 
     private Image halo;
 
+    private AnimationCurve animateOut;
+    private AnimationCurve animateIn;
+
 	// Use this for initialization
 	void Start () {
         display = GetComponent<Image>();
@@ -34,6 +37,18 @@ public class NodeDataContainer : MonoBehaviour
         rTransform = GetComponent<RectTransform>();
         button = GetComponent<Button>();
         parent = transform.parent;
+        NodeController nc;
+        if (!name.Contains("Central"))
+        {
+            nc = parent.parent.GetComponent<NodeController>();
+        }
+        else
+        {
+            nc = parent.GetComponent<NodeController>();
+        }
+        animateIn = nc.animateIn;
+        animateOut = nc.animateOut;
+        animationDuration = nc.animationDuration;
         visible = true;
         isEnabled = true;
         //display.color = new Color(0.5f, 0.5f, 0.5f);
@@ -129,7 +144,7 @@ public class NodeDataContainer : MonoBehaviour
         while (count < animationDuration)
         {
             count += Time.deltaTime;
-            parent.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, count / animationDuration);
+            parent.transform.localScale = Vector3.one * animateIn.Evaluate(count / animationDuration);
             yield return null;
         }
         parent.transform.localScale = Vector3.one;
@@ -144,7 +159,7 @@ public class NodeDataContainer : MonoBehaviour
         while (count < animationDuration)
         {
             count += Time.deltaTime;
-            parent.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, count / animationDuration);
+            parent.transform.localScale = Vector3.one * animateOut.Evaluate(count / animationDuration);
             yield return null;
         }
         parent.transform.localScale = Vector3.zero;

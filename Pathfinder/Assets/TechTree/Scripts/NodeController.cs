@@ -19,6 +19,10 @@ public class NodeController : MonoBehaviour {
 
     public bool hasCenter = true;
 
+    public AnimationCurve animateIn = AnimationCurve.Linear(0, 0, 1, 1);
+    public AnimationCurve animateOut = AnimationCurve.Linear(0, 1, 1, 0);
+    public float animationDuration = 0.5f;
+
     public delegate void CallBack(NodeDataContainer ndc);
     private CallBack cBack;
 

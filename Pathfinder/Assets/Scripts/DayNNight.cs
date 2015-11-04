@@ -12,17 +12,12 @@ public class DayNNight : MonoBehaviour {
     [Tooltip("Change from night to day in seconds")]
     public float nightToDayDuration = 1f;
     [Tooltip("Alpha of the Canvas During the Day")]
-    [Range(0, 1f)]
-    public float dayAlpha = 0;
+    public Color dayColor = new Color(0, 0, 0, 1);
     [Tooltip("Alpha of the Canvas During the Night")]
-    [Range(0, 1f)]
-    public float nightAlpha = 0.75f;
-
-    private Color dayColor;
-    private Color nightColor;
+    public Color nightColor = new Color(1, 1, 1, 0.75f);
 
     private float timer;
-    
+    private bool paused = false;
     public enum CycleState {Day, DayToNight, Night, NightToDay, Override};
     private CycleState state = CycleState.Day;
 
@@ -31,8 +26,6 @@ public class DayNNight : MonoBehaviour {
     // Use this for initialization
 	void Start () {
         timer = 0;
-        dayColor = new Color(0, 0, 0, dayAlpha);
-        nightColor = new Color(0, 0, 0, nightAlpha);
         if (state == CycleState.DayToNight || state == CycleState.NightToDay || state == CycleState.Override)
             state = CycleState.Day;
 
@@ -48,7 +41,8 @@ public class DayNNight : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        timer += Time.deltaTime;
+        if(!paused)
+            timer += Time.deltaTime;
         switch (state)
         {
             case CycleState.Day:
@@ -88,6 +82,16 @@ public class DayNNight : MonoBehaviour {
                 break;
         }
 	}
+
+    public void SetPauseState(bool isPaused)
+    {
+        paused = isPaused;
+    }
+
+    public bool IsPaused()
+    {
+        return paused;
+    }
 
     public CycleState GetState()
     {

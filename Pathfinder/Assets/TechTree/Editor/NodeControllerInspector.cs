@@ -60,6 +60,9 @@ public class NodeControllerInspector : Editor {
                 UpdateColors(next);
             }
         }
+        nCont.animateIn = EditorGUILayout.CurveField("In Curve", nCont.animateIn);
+        nCont.animateOut = EditorGUILayout.CurveField("Out Curve", nCont.animateOut);
+        nCont.animationDuration = EditorGUILayout.FloatField("Animation Duration", nCont.animationDuration);
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Nodes", GUILayout.MaxWidth(EditorGUIUtility.labelWidth));
         EditorGUILayout.BeginHorizontal();

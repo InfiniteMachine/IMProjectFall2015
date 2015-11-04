@@ -4,13 +4,12 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class MouseHover : MonoBehaviour {
-    public NodeController techTree;
     public float animationDuration = 0.5f;
     public float animationDelay = 0.5f;
+    public AnimationCurve animateOpen = AnimationCurve.Linear(0, 0, 1, 1);
+    public AnimationCurve animateClose = AnimationCurve.Linear(0, 1, 1, 0);
     private bool open = false;
 
-    private List<NodeDataContainer> nodes;
-    //private CanvasGroup alphaController;
     private RectTransform rTransform;
 
     private Text title;
@@ -109,7 +108,7 @@ public class MouseHover : MonoBehaviour {
         count = 0;
         while (count <= animationDuration)
         {
-            transform.localScale = Vector3.Lerp(scale, Vector3.one, count / animationDuration);
+            transform.localScale = Vector3.one * animateOpen.Evaluate(count / animationDuration);
             count += Time.deltaTime;
             yield return null;
         }
@@ -124,7 +123,7 @@ public class MouseHover : MonoBehaviour {
         Vector3 scale = rTransform.localScale;
         while (count <= animationDuration)
         {
-            transform.localScale = Vector3.Lerp(scale, Vector3.zero, count / animationDuration);
+            transform.localScale = Vector3.one * animateOpen.Evaluate(count / animationDuration);
             count += Time.deltaTime;
             yield return null;
         }
