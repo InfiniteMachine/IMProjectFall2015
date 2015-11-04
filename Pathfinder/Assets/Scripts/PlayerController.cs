@@ -19,11 +19,11 @@ public class PlayerController : MonoBehaviour {
 	public float glideTime;
 	public float currentGlideTime;
 
-	//[HideInInspector]
+	[HideInInspector]
 	public bool isGroundLeft, isGroundRight;
 
 	public bool leftDown, rightDown;
-	public bool canFly, canDigDown, canDigLeft, canDigRight;
+	[HideInInspector] public bool canFly, canDigDown, canDigLeft, canDigRight;
 	GameObject objectToDig;
 	Rigidbody2D playerRigidbody;
 	SpriteRenderer sprite;
@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour {
 		if (Input.GetKey (KeyCode.Space) && isGrounded && !jumped) {
 			jumped = true;
 			Invoke("StartFly", .15f);
-			playerRigidbody.velocity += Vector2.up * jumpPower;
+			playerRigidbody.velocity = new Vector2(playerRigidbody.velocity.x, jumpPower);
 		}
 		//-------------------------------------------------------------------------------------------
 

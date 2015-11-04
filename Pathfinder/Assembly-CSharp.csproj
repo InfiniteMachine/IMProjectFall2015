@@ -47,6 +47,7 @@
   <ItemGroup>
      <Compile Include="Assets\Audio Manager\Audio.cs" />
      <Compile Include="Assets\Audio Manager\AudioManager.cs" />
+     <Compile Include="Assets\CameraController.cs" />
      <Compile Include="Assets\RoofCollapse.cs" />
      <Compile Include="Assets\Scripts\BreakableTerrain.cs" />
      <Compile Include="Assets\Scripts\DayNNight.cs" />
