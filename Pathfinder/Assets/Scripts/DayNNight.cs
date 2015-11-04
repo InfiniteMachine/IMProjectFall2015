@@ -89,6 +89,11 @@ public class DayNNight : MonoBehaviour {
         }
 	}
 
+    public CycleState GetState()
+    {
+        return state;
+    }
+
     public void SwapState(CycleState newState, bool force)
     {
         if (state == CycleState.Override)
