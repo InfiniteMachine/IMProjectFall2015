@@ -97,6 +97,7 @@ public class FoodTracker : MonoBehaviour {
 
 		// Update art
 		Debug.Log ("Eated food" + index);
+		display ();
 	}
 
 	public bool specialCase()
