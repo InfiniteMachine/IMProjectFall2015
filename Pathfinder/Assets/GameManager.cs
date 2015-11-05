@@ -17,7 +17,8 @@ public class GameManager : MonoBehaviour {
 	void Awake () {
 		DontDestroyOnLoad (gameObject);
 		respawn ();
-		localCamera.GetComponent<CameraFollow>().newFollow(GameObject.Find ("PlayerCharacter"));
+		Application.LoadLevel ("Nest");
+		//localCamera.GetComponent<CameraFollow>().newFollow(GameObject.Find ("PlayerCharacter"));
 	}
 	
 	// Update is called once per frame
@@ -43,5 +44,13 @@ public class GameManager : MonoBehaviour {
 	{
 		checkpoint.scene = Application.loadedLevelName;
 		checkpoint.pos = transform.position;
+	}
+
+	void OnLevelWasLoaded(int level)
+	{
+		if (GameObject.Find ("CameraHolder"))
+			localCamera = GameObject.Find ("CameraHolder");
+		else
+			localCamera = null;
 	}
 }
