@@ -4,7 +4,7 @@ using System.Collections;
 public class CameraController : MonoBehaviour {
 
 	public GameObject playerCamera;
-
+    public Canvas DayNightCanvas;
 	public float close, far;
 	public Vector3 cameraClose, cameraMid, cameraFar;
 
@@ -34,6 +34,10 @@ public class CameraController : MonoBehaviour {
 		} else {
 			playerCamera.transform.localPosition = Vector3.MoveTowards(playerCamera.transform.localPosition, cameraFar, 10f * Time.fixedDeltaTime);
 		}
-
 	}
+
+    void Update()
+    {
+        DayNightCanvas.planeDistance = -playerCamera.transform.localPosition.z + 0.1f;
+    }
 }
