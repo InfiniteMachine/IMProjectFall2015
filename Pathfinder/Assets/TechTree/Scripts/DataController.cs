@@ -221,4 +221,9 @@ public class DataController : MonoBehaviour {
         yield return null;
         function();
     }
+
+    public void CloseTree()
+    {
+        GameObject.Find("GameManager").GetComponent<GameManager>().respawn();
+    }
 }

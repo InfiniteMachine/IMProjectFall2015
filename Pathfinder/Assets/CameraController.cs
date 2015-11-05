@@ -16,6 +16,7 @@ public class CameraController : MonoBehaviour {
 
 		playerCamera = Camera.main.gameObject;
 		layerMask = 1 << groundLayer;
+        DayNightCanvas = GameObject.FindGameObjectWithTag("DayNightCanvas").GetComponent<Canvas>();
 	}
 	
 	// Update is called once per frame
