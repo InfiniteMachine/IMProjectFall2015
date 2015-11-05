@@ -7,6 +7,7 @@ public class SphereActions : MonoBehaviour {
 	FoodTracker trackerRef;
 	public float eatDuration = 0f;
 	public float eatRange = 1f;
+	float sleepRange = 2.5f;
 	float eatTime = 0f;
 	int currentEatingIndex = -1;
 
@@ -52,6 +53,13 @@ public class SphereActions : MonoBehaviour {
 			if(Input.GetKey(KeyCode.R) && eatTime == 0f)
 			{
 
+			}
+			else if(Input.GetKeyDown(KeyCode.E) && trackerRef.specialCase() && Vector3.Distance(transform.position, GameObject.Find("Nest").transform.position)<sleepRange) // Also, food must be at least >=1!!!!
+			{
+				// Go to sleep
+				controlRef.active = false;
+				// Start sleep animation
+				GameObject.Find ("GameManager").GetComponent<DelayedEndDay>().activate();
 			}
 		}
 	}

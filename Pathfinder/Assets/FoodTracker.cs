@@ -5,30 +5,58 @@ public class FoodTracker : MonoBehaviour {
 
 	public GameObject[] allFoods;
 	public bool[] consumed;
+	public int id;
 
 	// Use this for initialization
 	void Awake () {
 		DontDestroyOnLoad (gameObject);
+		id = GameObject.Find ("GameManager").GetComponent<GameManager> ().freshID ();
 		name = "FoodTracker" + Application.loadedLevelName;
 		bool shouldDestroy = false;
 		GameObject[] allFoodTrackers = GameObject.FindGameObjectsWithTag("FoodTracker");
 		int count = 0;
+		GameObject otherRef = null;
 		foreach(GameObject foodTracker in allFoodTrackers)
 		{
-			if(foodTracker.name==name)
-				count++;
+			if(foodTracker.name==name && foodTracker.GetComponent<FoodTracker>().id<id)
+			{
+				otherRef = foodTracker;
+				break;
+			}
 		}
 
 
-		if(count>1)
+		if(otherRef)
+		{
+			otherRef.GetComponent<FoodTracker>().reset(allFoods);
 			GameObject.Destroy(gameObject);
+		}
 
 		consumed = new bool[allFoods.Length];
 
-		// Load consumed bools from a save file
 		for (int x=0; x<consumed.Length; x++)
 			consumed [x] = false;
 
+		load ();
+		display ();
+	}
+
+	public void reset(GameObject[] foods)
+	{
+		allFoods = foods;
+		display();
+	}
+
+	public void load()
+	{
+		// Load consumed bools from a save file
+		// Figure out which bools are yours from
+		// the index of the loadedLevelName in
+		// <GameManager>().sceneNames
+	}
+
+	public void display()
+	{
 		// Activate/Disable correct foods, apply correct art, etc.
 		// Should have function that can deal with each of the foods
 		// art objects one at a time
@@ -63,5 +91,14 @@ public class FoodTracker : MonoBehaviour {
 
 		// Update art
 		Debug.Log ("Eated food" + index);
+	}
+
+	public bool specialCase()
+	{
+		if (Application.loadedLevelName != "Nest")
+			return true;
+		if (consumed [0])
+			return true;
+		return false;
 	}
 }
