@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
+		DontDestroyOnLoad (gameObject);
 		respawn ();
 		localCamera.GetComponent<CameraFollow>().newFollow(GameObject.Find ("PlayerCharacter"));
 	}
