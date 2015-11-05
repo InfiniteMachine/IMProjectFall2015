@@ -363,6 +363,20 @@ public class SphereController : MonoBehaviour {
 				}
 			}
 		}
+		deathCheck ();
+	}
+
+	void deathCheck()
+	{
+		RaycastHit hit;
+		Ray ray = new Ray(transform.position, velocity);
+		
+		//if something under the player
+		if (Physics.Raycast(ray, out hit, scalar, layers))
+		{
+			if(hit.collider.tag=="Death")
+				die ();
+		}
 	}
 	
 	int findSmallestDistance()
@@ -420,6 +434,9 @@ public class SphereController : MonoBehaviour {
 	public void die(string cause = "none")
 	{
 		// Do death stuff
+		GameObject.Find ("GameManager").GetComponent<DelayedRespawn> ().activate ();
+
+		// Despawn
 		despawn ();
 	}
 

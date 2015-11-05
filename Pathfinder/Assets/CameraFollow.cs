@@ -8,6 +8,7 @@ public class CameraFollow : MonoBehaviour {
 	public Vector3 followingPosition;
 	public bool useObject = false;
 	public bool usePosition = false;
+	public Vector3 velocity;
 
 	// Use this for initialization
 	void Awake() {
@@ -16,13 +17,22 @@ public class CameraFollow : MonoBehaviour {
 	
 	// Update is called once per frame
 	void LateUpdate () {
+		Vector3 startPos = transform.position;
 		float distance;
 		if(useObject)
 		{
-			distance = Vector3.Distance(transform.position, followingObject.transform.position);
-			transform.position = 
-				Vector3.MoveTowards(transform.position, followingObject.transform.position,
-				                    lerp.lerpStrength(distance)*Time.deltaTime);
+			if(followingObject==null)
+			{
+				useObject = false;
+			}
+			else
+			{
+				distance = Vector3.Distance(transform.position, followingObject.transform.position);
+				transform.position = 
+					Vector3.MoveTowards(transform.position, followingObject.transform.position,
+					                    lerp.lerpStrength(distance)*Time.deltaTime);
+				velocity = transform.position - startPos;
+			}
 		}
 		else if(usePosition)
 		{
@@ -30,6 +40,13 @@ public class CameraFollow : MonoBehaviour {
 			transform.position = 
 				Vector3.MoveTowards(transform.position, followingPosition,
 				                    lerp.lerpStrength( distance)*Time.deltaTime);
+			velocity = transform.position - startPos;
+		}
+		else if(velocity!=Vector3.zero)
+		{
+			transform.position += velocity;
+			velocity = Vector3.MoveTowards(velocity, Vector3.zero,
+			                               lerp.lerpStrength(velocity.magnitude) * Time.deltaTime * 0.5f);
 		}
 	}
 

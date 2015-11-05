@@ -4,6 +4,40 @@ using System.Collections;
 public class Platformer : MonoBehaviour {
 
 	[System.Serializable]
+	public class Timer
+	{
+		public float time = 1f;
+		float currentTime = 0f;
+		bool popped = false;
+
+		public Timer(float newTime)
+		{
+			time = newTime;
+		}
+
+		public void set()
+		{
+			currentTime = time;
+			popped = false;
+		}
+
+		public bool tick()
+		{
+			if (currentTime < 0f)
+				popped = false;
+			else
+			{
+				currentTime += -Time.deltaTime;
+				if(currentTime<0f)
+				{
+					popped = true;
+				}
+			}
+			return popped;
+		}
+	}
+
+	[System.Serializable]
 	public class ScenePosition
 	{
 		public string scene;
