@@ -15,6 +15,8 @@ public class SphereActions : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
+		if (GameObject.Find ("FoodTracker"))
+			GameObject.Find ("FoodTracker").name = "FoodTracker" + Application.loadedLevelName;
 		trackerRef = GameObject.Find ("FoodTracker" + Application.loadedLevelName).GetComponent<FoodTracker> ();
 		controlRef = GetComponent<SphereController> ();
 	}

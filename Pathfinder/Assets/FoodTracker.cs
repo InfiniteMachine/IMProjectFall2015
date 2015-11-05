@@ -60,6 +60,12 @@ public class FoodTracker : MonoBehaviour {
 		// Activate/Disable correct foods, apply correct art, etc.
 		// Should have function that can deal with each of the foods
 		// art objects one at a time
+
+		for(int x=0;x<allFoods.Length;x++)
+		{
+			if(consumed[x])
+				allFoods[x].SetActive(false);
+		}
 	}
 
 	public int nearFood(Vector3 pos, float range)
@@ -95,6 +101,8 @@ public class FoodTracker : MonoBehaviour {
 
 	public bool specialCase()
 	{
+		// This is a test for sleeping. You need to eat the first
+		// food in order to rest at nest.
 		if (Application.loadedLevelName != "Nest")
 			return true;
 		if (consumed [0])

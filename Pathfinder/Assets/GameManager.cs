@@ -13,11 +13,12 @@ public class GameManager : MonoBehaviour {
 
 	int number = -1;
 
+	bool respawning = false;
+
 	// Use this for initialization
 	void Awake () {
 		DontDestroyOnLoad (gameObject);
 		respawn ();
-		Application.LoadLevel ("Nest");
 		//localCamera.GetComponent<CameraFollow>().newFollow(GameObject.Find ("PlayerCharacter"));
 	}
 	
@@ -29,7 +30,11 @@ public class GameManager : MonoBehaviour {
 	public void respawn()
 	{
 		if (checkpoint.scene != Application.loadedLevelName)
+		{
+			respawning = true;
 			Application.LoadLevel (checkpoint.scene);
+			return;
+		}
 		GameObject a = (GameObject) GameObject.Instantiate (playerPrefab, checkpoint.pos, Quaternion.identity);
 		localCamera.GetComponent<CameraFollow>().newFollow (a);
 	}
@@ -52,5 +57,11 @@ public class GameManager : MonoBehaviour {
 			localCamera = GameObject.Find ("CameraHolder");
 		else
 			localCamera = null;
+
+		if(respawning)
+		{
+			respawn();
+			respawning = false;
+		}
 	}
 }
