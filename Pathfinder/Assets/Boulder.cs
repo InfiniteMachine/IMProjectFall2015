@@ -31,7 +31,7 @@ public class Boulder : MonoBehaviour {
 				GameObject.Destroy(gameObject);
 		}
 	}
-
+	// lol
 	void OnTriggerEnter2D(Collider2D other)
 	{
 		if(other.tag=="Player")
