@@ -127,8 +127,8 @@ public class SphereController : MonoBehaviour {
 
 		//Debug.Log (desiredVelocity);
 
-		//drawLevel (); 
-		//drawDistances ();
+		drawLevel (); 
+		drawDistances ();
 
 		if(grounded2)
 		{
@@ -453,6 +453,7 @@ public class SphereController : MonoBehaviour {
 		//if something under the player
 		if (Physics.Raycast(ray, out hit, length, layers))
 		{
+			hitCondition(hit.collider, 0f);
 			return hit.distance;
 		}
 		return length;
@@ -464,10 +465,23 @@ public class SphereController : MonoBehaviour {
 
 		if(hit)
 		{
+			hitCondition2D(hit.collider, 0f);
 			return hit.distance;
 		}
 		return length;
 		//return Physics2D.Raycast(position, direction, length, layers).distance;
+	}
+
+	void hitCondition2D(Collider2D other, float force = 0f) // Object was hit, here is the collider
+	{
+		// Jake, here
+		// Ignore the force variable
+	}
+
+	void hitCondition(Collider other, float force = 0f) // Object was hit, here is the collider
+	{
+		// Jake, here
+		// Ignore the force variable
 	}
 
 	public void drawLevel()
