@@ -1,55 +1,56 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class SphereController : MonoBehaviour {
 
-	public bool use2dCasts;
+    public bool use2dCasts;
 
-	public float angleIncrement;
-	public float scalar;
-	public Vector3 grip;
-	public float gravity;
-	public LayerMask layers;
+    public float angleIncrement;
+    public float scalar;
+    public Vector3 grip;
+    public float gravity;
+    public LayerMask layers;
 
-	public float walkVelocity = 10f;
-	public float flightVelocity = 10f;
-	public Platformer.Acceleration acceleration;
-	public Platformer.Acceleration airControl;
+    public float walkVelocity = 10f;
+    public float flightVelocity = 10f;
+    public Platformer.Acceleration acceleration;
+    public Platformer.Acceleration airControl;
 
-	public Vector3 velocity = Vector3.zero;
-	public Vector3 desiredVelocity;
-	int lastSmallestIndex = -1;
+    public Vector3 velocity = Vector3.zero;
+    public Vector3 desiredVelocity;
+    int lastSmallestIndex = -1;
 
-	bool applyGravity = true;
-	bool grounded1 = false;
-	bool grounded2 = false;
+    bool applyGravity = true;
+    bool grounded1 = false;
+    bool grounded2 = false;
 
-	int spacebar = 0;
-	int spacebarSet = 7;
-	int spacebarDown = 0;
-	int spacebarDownSet = 7;
+    int spacebar = 0;
+    int spacebarSet = 7;
+    int spacebarDown = 0;
+    int spacebarDownSet = 7;
 
-	float hovertime = 0f;
+    float hovertime = 0f;
 
-	public Platformer.AnalogStick horStick;
-	public Platformer.AnalogStick verStick;
-	public Platformer.Jumpset jumpset;
-	int nextJumpIndex = 9999;
-	Platformer.Jump currentJump;
-	bool jumping = false;
-	float currentJumpTime;
+    public Platformer.AnalogStick horStick;
+    public Platformer.AnalogStick verStick;
+    public Platformer.Jumpset jumpset;
+    int nextJumpIndex = 9999;
+    Platformer.Jump currentJump;
+    bool jumping = false;
+    float currentJumpTime;
 
-	float frameTime;
-	float fps = 60f;
-	public float timeCount = 0f;
+    float frameTime;
+    float fps = 60f;
+    public float timeCount = 0f;
 
-	int casts;
-	Vector3[] directions;
-	float[] distances;
-	float[] angles;
-	public bool debugBreakOnFall = false;
-	public bool active = true;
-	
+    int casts;
+    Vector3[] directions;
+    float[] distances;
+    float[] angles;
+    public bool debugBreakOnFall = false;
+    public bool active = true;
+    
 	// Use this for initialization
 	void Awake() {
 		frameTime = 1f / fps;
@@ -474,9 +475,21 @@ public class SphereController : MonoBehaviour {
 
 	void hitCondition2D(Collider2D other, float force = 0f) // Object was hit, here is the collider
 	{
-		// Jake, here
-		// Ignore the force variable
+        // Jake, here
+        // Ignore the force variable
+        if (other.tag == "DiggableTerrain" && Input.GetKey(KeyCode.F))
+        {
+            //Play Digging Animation
+            //Destroy Other Game Object after certain time
+            StartCoroutine(DigTerrain(other.gameObject, 1f));
+        }
 	}
+
+    IEnumerator DigTerrain(GameObject go, float time)
+    {
+        yield return new WaitForSeconds(time);
+        Destroy(go);
+    }
 
 	void hitCondition(Collider other, float force = 0f) // Object was hit, here is the collider
 	{

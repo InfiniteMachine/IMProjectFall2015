@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class SphereActions : MonoBehaviour {
 
@@ -11,6 +11,10 @@ public class SphereActions : MonoBehaviour {
 	float eatTime = 0f;
 	int currentEatingIndex = -1;
 
+
+    private bool canBite = false;
+    public List<string> biteableTags = new List<string>();
+    private Collider2D bitable;
 	// Should change transform.position to current world position of mouth
 
 	// Use this for initialization
@@ -23,14 +27,22 @@ public class SphereActions : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(controlRef.active && controlRef.velocity == Vector3.zero)
+        if (controlRef.active && controlRef.velocity == Vector3.zero)
 		{
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                //Play Biting Animation
+                if(bitable != null)
+                {
+                    bitable.GetComponent<BitableObject>().Bite();
+                }
+            }
 			if(Input.GetKey(KeyCode.E)) // eat
 			{
 				// Look for foods
 				int newEatingIndex = trackerRef.nearFood(transform.position, eatRange);
 
-				Debug.Log (eatTime + " " + newEatingIndex);
+				//Debug.Log (eatTime + " " + newEatingIndex);
 
 				if(newEatingIndex!=-1)
 				{
@@ -65,4 +77,22 @@ public class SphereActions : MonoBehaviour {
 			}
 		}
 	}
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (biteableTags.Contains(col.tag))
+        {
+            //if((facingRight && col.transform.position.x > transform.position.x) || (facingLeft && col.transform.position.x < transform.position.x))
+            //Need to change bitable to null when switch directions? maybe
+            bitable = col;
+        }
+    }
+
+    void OnTriggerExit2D(Collider2D col)
+    {
+        if(bitable = col)
+        {
+            bitable = null;
+        }
+    }
 }
