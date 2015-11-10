@@ -7,6 +7,7 @@ public class CameraFollow : MonoBehaviour {
 	public GameObject followingObject;
 	public Vector3 followingPosition;
 	public bool useObject = false;
+	public bool useReportedPosition = false;
 	public bool usePosition = false;
 	public Vector3 velocity;
 
@@ -24,6 +25,14 @@ public class CameraFollow : MonoBehaviour {
 			if(followingObject==null)
 			{
 				useObject = false;
+			}
+			else if(useReportedPosition)
+			{
+				distance = Vector3.Distance(transform.position, followingPosition);
+				transform.position = 
+					Vector3.MoveTowards(transform.position, followingPosition,
+					                    lerp.lerpStrength( distance)*Time.deltaTime);
+				velocity = transform.position - startPos;
 			}
 			else
 			{
@@ -55,6 +64,12 @@ public class CameraFollow : MonoBehaviour {
 		followingObject = a;
 		useObject = true;
 		usePosition = false;
+		useReportedPosition = false;
+		if(a.GetComponent<SphereController>())
+		{
+			a.GetComponent<SphereController>().camRef = this;
+			useReportedPosition = true;
+		}
 	}
 
 	public void newFollow(Vector3 a)
@@ -62,5 +77,11 @@ public class CameraFollow : MonoBehaviour {
 		followingPosition = a;
 		useObject = false;
 		usePosition = true;
+		useReportedPosition = false;
+	}
+
+	public void reportPosition(Vector3 a)
+	{
+		followingPosition = a;
 	}
 }

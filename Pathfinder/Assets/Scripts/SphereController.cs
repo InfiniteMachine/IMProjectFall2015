@@ -55,6 +55,8 @@ public class SphereController : MonoBehaviour {
     public bool debugBreakOnFall = false;
     public bool active = true;
 	Vector3 scale;
+
+	public CameraFollow camRef;
     
 	// Use this for initialization
 	void Awake() {
@@ -313,6 +315,8 @@ public class SphereController : MonoBehaviour {
 
 			clipVelocity(startPosition);
 		}
+		if (camRef != null)
+			camRef.reportPosition (transform.position);
 	}
 
 	void applyFly(Vector3 desiredVelocity)

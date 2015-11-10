@@ -68,7 +68,7 @@ public class SphereActions : MonoBehaviour {
 			{
 
 			}
-			else if(Input.GetKeyDown(KeyCode.E) && trackerRef.specialCase() && Vector3.Distance(transform.position, GameObject.Find("Nest").transform.position)<sleepRange) // Also, food must be at least >=1!!!!
+			else if(Input.GetKeyDown(KeyCode.E) && Vector3.Distance(transform.position, GameObject.Find("Nest").transform.position)<sleepRange)// && trackerRef.specialCase()) // Also, food must be at least >=1!!!!
 			{
 				// Go to sleep
 				controlRef.active = false;
