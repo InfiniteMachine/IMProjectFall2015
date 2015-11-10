@@ -241,7 +241,8 @@ public class SphereController : MonoBehaviour {
 			velocity = Vector3.MoveTowards (velocity, desiredVelocity, acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime);
 			if(velocity.magnitude>0.2f && grounded2)
 				animSet("walk");
-			else animSet("idle");
+			else if (grounded2)
+				animSet("idle");
 		}
 		else // Not grounded // Falling
 		{

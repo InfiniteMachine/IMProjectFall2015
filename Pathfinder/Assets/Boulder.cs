@@ -36,7 +36,7 @@ public class Boulder : MonoBehaviour {
 	{
 		if(other.tag=="Player")
 		{
-			GameObject.Find ("PlayerCharacter").GetComponent<SphereController>().die ();
+			GameObject.Find ("PlayerCharacter(Clone)").GetComponent<SphereController>().die ();
 		}
 	}
 
