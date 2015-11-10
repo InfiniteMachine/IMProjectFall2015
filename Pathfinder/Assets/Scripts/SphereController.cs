@@ -6,6 +6,8 @@ public class SphereController : MonoBehaviour {
 
     public bool use2dCasts;
 
+	public Animator animRef;
+
     public float angleIncrement;
     public float scalar;
     public Vector3 grip;
@@ -52,9 +54,13 @@ public class SphereController : MonoBehaviour {
     float[] angles;
     public bool debugBreakOnFall = false;
     public bool active = true;
+	Vector3 scale;
     
 	// Use this for initialization
 	void Awake() {
+		scale = transform.localScale;
+		animRef = GetComponentInChildren<Animator> ();
+
 		frameTime = 1f / fps;
 
 		casts = Mathf.RoundToInt(360f / angleIncrement);
@@ -95,12 +101,15 @@ public class SphereController : MonoBehaviour {
 			timeCount += -frameTime;
 			UpdateCall();
 		}
+		if (velocity.x > 0.3f)
+			transform.localScale = scale;
+		else if (velocity.x < -0.3f)
+			transform.localScale = new Vector3(-scale.x, scale.y, scale.z);
 	}
 
 	// Update is called once per frame
 	void UpdateCall () {
 		//Debug.Log (velocity.magnitude);
-
 		Vector3 startPosition = transform.position;
 		startPos = startPosition;
 		desiredVelocity = Vector3.zero;
@@ -131,8 +140,8 @@ public class SphereController : MonoBehaviour {
 
 		//Debug.Log (desiredVelocity);
 
-		drawLevel (); 
-		drawDistances ();
+		//drawLevel (); 
+		//drawDistances ();
 
 		if(grounded2)
 		{
@@ -222,6 +231,7 @@ public class SphereController : MonoBehaviour {
 				nextJumpIndex++;
 				currentGrip = 0f;
 				spacebarDown = 0;
+				animSet("jump");
 			}
 			// Apply translation from velocity
 			transform.position += velocity * frameTime;
@@ -229,6 +239,9 @@ public class SphereController : MonoBehaviour {
 			clip ();
 			clipVelocity(startPosition);
 			velocity = Vector3.MoveTowards (velocity, desiredVelocity, acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime);
+			if(velocity.magnitude>0.2f && grounded2)
+				animSet("walk");
+			else animSet("idle");
 		}
 		else // Not grounded // Falling
 		{
@@ -294,6 +307,7 @@ public class SphereController : MonoBehaviour {
 				nextJumpIndex++;
 				spacebarDown = 0;
 				jumping = true;
+				animSet("fly");
 			}
 
 			clipVelocity(startPosition);
@@ -517,6 +531,39 @@ public class SphereController : MonoBehaviour {
 	{
 		// Jake, here
 		// Ignore the force variable
+	}
+
+	void animSet(string command)
+	{
+		if(command=="walk")
+		{
+			animRef.SetBool("walking", true);
+			animRef.SetBool("idle", false);
+			animRef.SetBool("jumping", false);
+			animRef.SetBool("flying", false);
+		}
+		else if(command=="idle")
+		{
+			animRef.SetBool("walking", false);
+			animRef.SetBool("idle", true);
+			animRef.SetBool("jumping", false);
+			animRef.SetBool("flying", false);
+		}
+		else if(command=="fly")
+		{
+			animRef.SetBool("walking", false);
+			animRef.SetBool("idle", false);
+			animRef.SetBool("jumping", false);
+			animRef.SetBool("flying", true);
+		}
+		else if(command=="jump")
+		{
+			animRef.SetBool("walking", false);
+			animRef.SetBool("idle", false);
+			animRef.SetBool("jumping", true);
+			animRef.SetBool("flying", false);
+
+		}
 	}
 
 	public void drawLevel()
