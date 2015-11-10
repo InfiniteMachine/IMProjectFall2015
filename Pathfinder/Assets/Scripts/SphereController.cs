@@ -19,6 +19,8 @@ public class SphereController : MonoBehaviour {
 
     public Vector3 velocity = Vector3.zero;
     public Vector3 desiredVelocity;
+	public float thegrip;
+	public Vector3 startPos;
     int lastSmallestIndex = -1;
 
     bool applyGravity = true;
@@ -100,6 +102,7 @@ public class SphereController : MonoBehaviour {
 		//Debug.Log (velocity.magnitude);
 
 		Vector3 startPosition = transform.position;
+		startPos = startPosition;
 		desiredVelocity = Vector3.zero;
 		float gravityEffect = -gravity * frameTime;
 		float currentGrip;
@@ -135,14 +138,17 @@ public class SphereController : MonoBehaviour {
 		{
 			gameObject.GetComponent<Renderer>().material.color = Color.blue;
 
-			if(grounded1 && lastSmallestIndex!=-1)
+			if(grounded1 && 
+			   lastSmallestIndex!=-1)
 			{ // Ground Glue
 				//if(velocity==Vector3.zero)
 				//	transform.position += new vector3
 				transform.position += ((velocity+(directions[lastSmallestIndex]*velocity.magnitude) + new Vector3(0f,gravityEffect*frameTime,0f)))*frameTime;
 			}
 			else
-				transform.position += velocity + new Vector3(0f,velocity.magnitude,0f)*frameTime;
+			{
+				transform.position += (velocity + new Vector3(0f,-velocity.magnitude + gravityEffect*frameTime,0f))*frameTime;
+			}
 
 			// Desired velocity index
 			int dVIndex = -1;
@@ -155,6 +161,7 @@ public class SphereController : MonoBehaviour {
 			else dVIndex = smallestIndex;
 			lastSmallestIndex = smallestIndex;
 			currentGrip = findGrip(smallestIndex);
+			thegrip = currentGrip;
 			transform.position = startPosition;
 
 			float hor = horStick.returnThrottle();
@@ -173,6 +180,21 @@ public class SphereController : MonoBehaviour {
 				float deltaAngle = Mathf.Abs(Vector3.Angle(desiredVelocity, velocity));
 				if(desiredVelocity!=Vector3.zero && deltaAngle<90f)
 					velocity = Vector3.RotateTowards(velocity, desiredVelocity, (currentGrip*deltaAngle*Mathf.Deg2Rad),0f);
+				else if(desiredVelocity==Vector3.zero)
+				{
+					Vector3 expectedVelocity = velocity;
+					if(velocity.x>0f)
+						expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
+						                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
+					else if(velocity.x<0f)
+						expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
+						                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
+					deltaAngle = Mathf.Abs (Vector3.Angle(expectedVelocity, velocity));
+					Vector3 oldVel = velocity;
+					velocity = Vector3.RotateTowards(velocity, expectedVelocity, (currentGrip*deltaAngle*Mathf.Deg2Rad),0f);
+					if(velocity!=Vector3.zero || oldVel!=Vector3.zero)
+						Debug.Log (oldVel + " " + velocity);
+				}
 			}
 			else if(grounded1==false)
 			{
