@@ -97,12 +97,10 @@ public class SphereController : MonoBehaviour {
 				spacebarDown = spacebarDownSet;
 		}
 
-		timeCount += Time.deltaTime;
-		if(timeCount>frameTime)
-		{
-			timeCount += -frameTime;
-			UpdateCall();
-		}
+		frameTime = Time.deltaTime;
+		if (frameTime > 0.034f)
+			frameTime = 0.034f;
+		UpdateCall ();
 		if (velocity.x > 0.3f)
 			transform.localScale = scale;
 		else if (velocity.x < -0.3f)
@@ -315,8 +313,6 @@ public class SphereController : MonoBehaviour {
 
 			clipVelocity(startPosition);
 		}
-		if (camRef != null)
-			camRef.reportPosition (transform.position);
 	}
 
 	void applyFly(Vector3 desiredVelocity)

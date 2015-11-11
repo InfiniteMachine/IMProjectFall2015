@@ -10,6 +10,7 @@ public class CameraFollow : MonoBehaviour {
 	public bool useReportedPosition = false;
 	public bool usePosition = false;
 	public Vector3 velocity;
+	float frameTime;
 
 	// Use this for initialization
 	void Awake() {
@@ -31,7 +32,7 @@ public class CameraFollow : MonoBehaviour {
 				distance = Vector3.Distance(transform.position, followingPosition);
 				transform.position = 
 					Vector3.MoveTowards(transform.position, followingPosition,
-					                    lerp.lerpStrength( distance)*Time.deltaTime);
+					                    lerp.lerpStrength( distance)*frameTime);
 				velocity = transform.position - startPos;
 			}
 			else
@@ -65,11 +66,11 @@ public class CameraFollow : MonoBehaviour {
 		useObject = true;
 		usePosition = false;
 		useReportedPosition = false;
-		if(a.GetComponent<SphereController>())
+		/*if(a.GetComponent<SphereController>())
 		{
 			a.GetComponent<SphereController>().camRef = this;
 			useReportedPosition = true;
-		}
+		}*/
 	}
 
 	public void newFollow(Vector3 a)
@@ -80,8 +81,9 @@ public class CameraFollow : MonoBehaviour {
 		useReportedPosition = false;
 	}
 
-	public void reportPosition(Vector3 a)
+	public void reportPosition(Vector3 a, float deltaTime)
 	{
 		followingPosition = a;
+		frameTime = deltaTime;
 	}
 }
