@@ -510,22 +510,10 @@ public class SphereController : MonoBehaviour {
 		//return Physics2D.Raycast(position, direction, length, layers).distance;
 	}
 
-	void hitCondition2D(Collider2D other, float force = 0f) // Object was hit, here is the collider
-	{
+    void hitCondition2D(Collider2D other, float force = 0f) // Object was hit, here is the collider
+    {
         // Jake, here
         // Ignore the force variable
-        if (other.tag == "DiggableTerrain" && Input.GetKey(KeyCode.F))
-        {
-            //Play Digging Animation
-            //Destroy Other Game Object after certain time
-            StartCoroutine(DigTerrain(other.gameObject, 1f));
-        }
-	}
-
-    IEnumerator DigTerrain(GameObject go, float time)
-    {
-        yield return new WaitForSeconds(time);
-        Destroy(go);
     }
 
 	void hitCondition(Collider other, float force = 0f) // Object was hit, here is the collider

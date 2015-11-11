@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class SphereActions : MonoBehaviour {
@@ -14,7 +15,10 @@ public class SphereActions : MonoBehaviour {
 
     private bool canBite = false;
     public List<string> biteableTags = new List<string>();
-    private Collider2D bitable;
+    private Collider2D bitable = null;
+    private Collider2D digable = null;
+
+    public float digDuration = 1f;
 	// Should change transform.position to current world position of mouth
 
 	// Use this for initialization
@@ -35,6 +39,15 @@ public class SphereActions : MonoBehaviour {
                 if(bitable != null)
                 {
                     bitable.GetComponent<BitableObject>().Bite();
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                if(digable != null)
+                {
+                    //Play Digging Animation
+                    //Destroy Other Game Object after certain time
+                    StartCoroutine(DestroyLater(digable.gameObject, digDuration));
                 }
             }
 			if(Input.GetKey(KeyCode.E)) // eat
@@ -86,13 +99,27 @@ public class SphereActions : MonoBehaviour {
             //Need to change bitable to null when switch directions? maybe
             bitable = col;
         }
+        else if (col.tag == "DiggableTerrain")
+        {
+            digable = col;
+        }
+    }
+
+    IEnumerator DestroyLater(GameObject go, float time)
+    {
+        yield return new WaitForSeconds(time);
+        Destroy(go);
     }
 
     void OnTriggerExit2D(Collider2D col)
     {
-        if(bitable = col)
+        if(bitable == col)
         {
             bitable = null;
+        }
+        else if(digable == col)
+        {
+            digable = null;
         }
     }
 }
