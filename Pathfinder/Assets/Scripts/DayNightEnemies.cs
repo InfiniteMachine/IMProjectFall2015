@@ -3,7 +3,6 @@ using System.Collections;
 
 public class DayNightEnemies : MonoBehaviour {
     GameObject Player;
-    GameObject Enemy;
 
     bool enemyEngaged = false;
     bool enemyFacingRight = false;
@@ -19,17 +18,14 @@ public class DayNightEnemies : MonoBehaviour {
     float enemySpeed;
 
 	// Use this for initialization
-	void Start () {
-
-        Player = GameObject.Find("Player");
-        Enemy = GameObject.Find("Enemy");
-
+	void Awake () {
+        Player = GameObject.FindGameObjectWithTag("Player");
 	}
 	
 	// Update is called once per frame
     void Update()
     {
-        var distance = Vector3.Distance(Player.transform.position, Enemy.transform.position);
+        var distance = Vector3.Distance(Player.transform.position, transform.position);
         
         if (enemyEngaged == false)
         {
@@ -49,7 +45,7 @@ public class DayNightEnemies : MonoBehaviour {
 
             enemyAcceleration = 10 / (4 * distance);
             enemySpeed = enemyBaseSpeed + enemyAcceleration;
-            Enemy.transform.position = Vector2.MoveTowards(Enemy.transform.position, Player.transform.position, enemySpeed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, enemySpeed * Time.deltaTime);
 
             //check if enemy still engaged
             //distance too great, enemyEngaged=false
@@ -59,7 +55,7 @@ public class DayNightEnemies : MonoBehaviour {
             }
 
             //flip enemy
-            if (Player.transform.position.x > Enemy.transform.position.x)
+            if (Player.transform.position.x > transform.position.x)
             {
                 if (enemyFacingRight == false)
                 {
@@ -67,7 +63,7 @@ public class DayNightEnemies : MonoBehaviour {
                     Flip();
                 }
             }
-            if (Player.transform.position.x < Enemy.transform.position.x)
+            if (Player.transform.position.x < transform.position.x)
             {
                 if (enemyFacingRight == true)
                 {
@@ -82,6 +78,6 @@ public class DayNightEnemies : MonoBehaviour {
     {
         Vector3 Scale = transform.localScale;
         Scale.x *= -1;
-        Enemy.transform.localScale = Scale;
+        transform.localScale = Scale;
     }
 }
