@@ -16,9 +16,12 @@ public class SphereActions : MonoBehaviour {
     private bool canBite = false;
     public List<string> biteableTags = new List<string>();
     private Collider2D bitable = null;
-    private Collider2D digable = null;
 
     public float digDuration = 1f;
+    public float maxDigDistance = 3f;
+    public float biteDuration = 1f;
+    private Coroutine dig;
+    private Coroutine bite;
 	// Should change transform.position to current world position of mouth
 
 	// Use this for initialization
@@ -33,44 +36,62 @@ public class SphereActions : MonoBehaviour {
 	void Update () {
         if (controlRef.active && controlRef.velocity == Vector3.zero)
 		{
-            if (Input.GetKeyDown(KeyCode.E))
+            if (Input.GetKeyDown(KeyCode.F) && dig == null)
             {
-                //Play Biting Animation
-                if(bitable != null)
+                RaycastHit2D hit;
+                Vector2 castDirection = Vector2.zero;
+                if (Input.GetKey(KeyCode.A))
                 {
-                    bitable.GetComponent<BitableObject>().Bite();
+                    //Dig Left
+                    castDirection = Vector2.left;
+                }else if (Input.GetKey(KeyCode.D))
+                {
+                    //Dig Right
+                    castDirection = Vector2.right;
+                }
+                else if (Input.GetKey(KeyCode.S))
+                {
+                    castDirection = Vector2.down;
+                }
+                hit = Physics2D.Raycast(transform.position, castDirection, maxDigDistance);
+                if (hit)
+                {
+                    if(hit.collider.tag == "DiggableTerrain")
+                    {
+                        dig = StartCoroutine(DestroyLater(hit.collider.gameObject, digDuration));
+                    }
                 }
             }
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                if(digable != null)
-                {
-                    //Play Digging Animation
-                    //Destroy Other Game Object after certain time
-                    StartCoroutine(DestroyLater(digable.gameObject, digDuration));
-                }
-            }
-			if(Input.GetKey(KeyCode.E)) // eat
+			if(Input.GetKeyDown(KeyCode.E)) // eat
 			{
-				// Look for foods
-				int newEatingIndex = trackerRef.nearFood(transform.position, eatRange);
+                if (bitable != null)
+                {
+                    //PlayBitingAnimation
+                    bite = StartCoroutine(BiteLater(bitable.gameObject, biteDuration));
+                }
+                else
+                {
+                    // Look for foods
+                    int newEatingIndex = trackerRef.nearFood(transform.position, eatRange);
 
-				//Debug.Log (eatTime + " " + newEatingIndex);
+                    //Debug.Log (eatTime + " " + newEatingIndex);
 
-				if(newEatingIndex!=-1)
-				{
-					if(currentEatingIndex==newEatingIndex)
-					{
-						eatTime += Time.deltaTime;
-						if(eatTime>eatDuration)
-						{
-							trackerRef.eat(currentEatingIndex);
-							currentEatingIndex = -1;
-						}
-					}
-					else eatTime = 0f;
-					currentEatingIndex = newEatingIndex;
-				}
+                    if (newEatingIndex != -1)
+                    {
+                        //if (currentEatingIndex == newEatingIndex)
+                        //{
+                        //    eatTime += Time.deltaTime;
+                        //    if (eatTime > eatDuration)
+                        //    {
+                        //        trackerRef.eat(currentEatingIndex);
+                        //        currentEatingIndex = -1;
+                        //    }
+                        //}
+                        //else eatTime = 0f;
+                        //currentEatingIndex = newEatingIndex;
+                        bite = StartCoroutine(BiteLater(newEatingIndex, biteDuration));
+                    }
+                }
 			}
 			else 
 			{
@@ -95,14 +116,16 @@ public class SphereActions : MonoBehaviour {
     {
         if (biteableTags.Contains(col.tag))
         {
-            //if((facingRight && col.transform.position.x > transform.position.x) || (facingLeft && col.transform.position.x < transform.position.x))
-            //Need to change bitable to null when switch directions? maybe
-            bitable = col;
+            if((controlRef.transform.localScale.x > 0 && col.transform.position.x > transform.position.x) || (controlRef.transform.localScale.x < 0 && col.transform.position.x < transform.position.x))
+                bitable = col;
         }
-        else if (col.tag == "DiggableTerrain")
-        {
-            digable = col;
-        }
+    }
+
+    public void StopDig()
+    {
+        if (dig != null)
+            StopCoroutine(dig);
+        dig = null;
     }
 
     IEnumerator DestroyLater(GameObject go, float time)
@@ -111,15 +134,30 @@ public class SphereActions : MonoBehaviour {
         Destroy(go);
     }
 
+    public void StopBite()
+    {
+        if(bite != null)
+            StopCoroutine(bite);
+        bite = null;
+    }
+
+    IEnumerator BiteLater(GameObject go, float time)
+    {
+        yield return new WaitForSeconds(time);
+        go.GetComponent<BitableObject>().Bite();
+    }
+
+    IEnumerator BiteLater(int foodIndex, float time)
+    {
+        yield return new WaitForSeconds(time);
+        trackerRef.eat(foodIndex);
+    }
+
     void OnTriggerExit2D(Collider2D col)
     {
         if(bitable == col)
         {
             bitable = null;
-        }
-        else if(digable == col)
-        {
-            digable = null;
         }
     }
 }
