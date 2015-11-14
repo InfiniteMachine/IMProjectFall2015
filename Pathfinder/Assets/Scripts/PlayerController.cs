@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour {
 		// -----------------------------------------------------------------------------------------
 		if (Input.GetKey (KeyCode.A) && !isGroundLeft) {
 			//sprite.sprite = movementSprites[0];
-			playerAni.SetBool("walking", true);
+			//playerAni.SetBool("walking", true);
 			leftDown = true;
 			rightDown = false;
 			if (currentSpeed >= -maxSpeed)
@@ -58,7 +58,7 @@ public class PlayerController : MonoBehaviour {
 			playerRigidbody.velocity = new Vector2(currentSpeed, playerRigidbody.velocity.y);
 		} else if (Input.GetKey (KeyCode.D) && !isGroundRight) {
 			//sprite.sprite = movementSprites[1];
-			playerAni.SetBool("walking", true);
+			//playerAni.SetBool("walking", true);
 			rightDown = true;
 			leftDown = false;
 			if (currentSpeed <= maxSpeed)
@@ -67,8 +67,8 @@ public class PlayerController : MonoBehaviour {
 			playerRigidbody.velocity = new Vector2(currentSpeed, playerRigidbody.velocity.y);
 		}
 		else  {
-			playerAni.SetBool("walking", false);
-			playerAni.SetBool("Idle", true);
+			//playerAni.SetBool("walking", false);
+			//playerAni.SetBool("Idle", true);
 
 			if(Mathf.Abs (currentSpeed) > 0.1f){
 				currentSpeed = Mathf.Max (0, Mathf.Abs (currentSpeed) - 0.5f) * ((currentSpeed > 0) ? 1 : -1);
@@ -153,7 +153,7 @@ public class PlayerController : MonoBehaviour {
 			jumped = false;
 			currentFlightTime = flightTime;
 			currentGlideTime = glideTime;
-			playerAni.SetBool("jumping", false);
+			//playerAni.SetBool("jumping", false);
 		}
 
 		if (col.transform.tag == "BreakableTerrain") {
