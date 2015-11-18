@@ -52,14 +52,17 @@ public class SphereController : MonoBehaviour {
     Vector3[] directions;
     float[] distances;
     float[] angles;
+	const float groundBufferFactor = 1.005f;
     public bool debugBreakOnFall = false;
     public bool active = true;
 	Vector3 scale;
+	Vector3 spawnPosition;
 
 	public CameraFollow camRef;
     
 	// Use this for initialization
 	void Awake() {
+		spawnPosition = transform.position;
 		scale = transform.localScale;
 		animRef = GetComponentInChildren<Animator> ();
 
@@ -147,7 +150,16 @@ public class SphereController : MonoBehaviour {
 		{
 			gameObject.GetComponent<Renderer>().material.color = Color.blue;
 
-			if(grounded1 && 
+			if(velocity.magnitude <(acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * lastGrip * frameTime)
+			   && horStick.returnThrottle()==0f)
+			{
+				velocity = Vector3.zero;
+				Debug.Log ("Fall->Ground vel set to zero");
+			}
+			else if(horStick.returnThrottle()==0f)
+				Debug.Log ("Velmag " + (velocity.magnitude*1000f));
+
+			if(grounded1 &&
 			   lastSmallestIndex!=-1)
 			{ // Ground Glue
 				//if(velocity==Vector3.zero)
@@ -168,20 +180,57 @@ public class SphereController : MonoBehaviour {
 			if(smallestIndex==-1)
 				dVIndex = lastSmallestIndex;
 			else dVIndex = smallestIndex;
+
+			float hor = horStick.returnThrottle();
+			bool directionRight = true;
+			if(hor>0f)
+				directionRight = true;
+			else if(hor<0f)
+				directionRight = false;
+			else if(velocity.x>0f)
+				directionRight = true;
+			else if(velocity.x<0f)
+				directionRight = false;
+			// New - Use worst-case (grounded-est) velocity angle
+			if(smallestIndex!=-1 && lastSmallestIndex!=-1) // Must have two case
+			{
+				float si, lsi; // abbreviated, floats for angle comparison
+
+				if(directionRight)
+				{
+					si = angles[smallestIndex] - 180f;
+					lsi = angles[lastSmallestIndex] - 180f;
+				}
+				else
+				{
+					si = 360f - angles[smallestIndex];
+					lsi = 360f - angles[lastSmallestIndex];
+				}
+				if(si>lsi)
+					dVIndex = smallestIndex;
+				else dVIndex = lastSmallestIndex;
+			}
+
 			lastSmallestIndex = smallestIndex;
 			currentGrip = findGrip(smallestIndex);
 			thegrip = currentGrip;
 			transform.position = startPosition;
 
-			float hor = horStick.returnThrottle();
-			if(hor<0f && active)
-				desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
-				                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f)
-					* hor * walkVelocity;
-			else if(hor>0f && active)
-				desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
-				                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f)
-					* -hor * walkVelocity;
+			if(dVIndex==-1)
+			{
+
+			}
+			else
+			{
+				if(hor<0f && active)
+					desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
+					                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f)
+						* hor * walkVelocity;
+				else if(hor>0f && active)
+					desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
+					                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f)
+						* -hor * walkVelocity;
+			}
 
 			if(currentGrip>0f)
 			{
@@ -191,18 +240,30 @@ public class SphereController : MonoBehaviour {
 					velocity = Vector3.RotateTowards(velocity, desiredVelocity, (currentGrip*deltaAngle*Mathf.Deg2Rad),0f);
 				else if(desiredVelocity==Vector3.zero)
 				{
-					Vector3 expectedVelocity = velocity;
-					if(velocity.x>0f)
-						expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
-						                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
-					else if(velocity.x<0f)
-						expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
-						                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
-					deltaAngle = Mathf.Abs (Vector3.Angle(expectedVelocity, velocity));
-					Vector3 oldVel = velocity;
-					velocity = Vector3.RotateTowards(velocity, expectedVelocity, (currentGrip*deltaAngle*Mathf.Deg2Rad),0f);
-					if(velocity!=Vector3.zero || oldVel!=Vector3.zero)
-						Debug.Log (oldVel + " " + velocity);
+					if(velocity.magnitude<(acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime))
+					{
+						if(velocity!=Vector3.zero)
+							Debug.Log ("GroundContact");
+						velocity = Vector3.zero;
+						moveIntoGroundContact();
+					}
+					else
+					{
+						Debug.Log ("--Magn: " + velocity.magnitude);
+						Debug.Log ((acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime) + "--");
+						Vector3 expectedVelocity = velocity;
+						if(velocity.x>0f)
+							expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
+							                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
+						else if(velocity.x<0f)
+							expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
+							                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
+						deltaAngle = Mathf.Abs (Vector3.Angle(expectedVelocity, velocity));
+						Vector3 oldVel = velocity;
+						velocity = Vector3.RotateTowards(velocity, expectedVelocity, (currentGrip*deltaAngle*Mathf.Deg2Rad),0f);
+						if(velocity!=Vector3.zero || oldVel!=Vector3.zero)
+							Debug.Log (oldVel + " " + velocity);
+					}
 				}
 			}
 			else if(grounded1==false)
@@ -243,6 +304,8 @@ public class SphereController : MonoBehaviour {
 				animSet("walk");
 			else if (grounded2)
 				animSet("idle");
+
+			// Special case for ground jitter?
 		}
 		else // Not grounded // Falling
 		{
@@ -276,7 +339,6 @@ public class SphereController : MonoBehaviour {
 				if(horStick.returnThrottle()!=0f)
 					desiredVelocity.x = horStick.returnThrottle() * walkVelocity;
 				velocity = Vector3.MoveTowards(velocity, desiredVelocity, airControl.lerpStrength(Vector3.Distance(velocity, desiredVelocity)) * frameTime);
-
 			}
 
 			// 1 Apply X,Y simultaneously
@@ -330,7 +392,16 @@ public class SphereController : MonoBehaviour {
 	void clip(int smallestIndex, float mag = 1f)
 	{
 		if(smallestIndex!=-1)
+		{
 			transform.position += -mag * ((scalar-distances[smallestIndex])*directions[smallestIndex]);
+			/*if(grounded2 && findGrip(smallestIndex)>0f)
+			{
+				if(desiredVelocity==Vector3.zero && velocity.magnitude<(Time.deltaTime*gravity))
+				{
+
+				}
+			}*/
+		}
 	}
 
 	void clip(float mag = 1f)
@@ -345,8 +416,8 @@ public class SphereController : MonoBehaviour {
 		Vector3 clipVector = (clipPosition - startPosition) / frameTime;
 		Vector3 oldVelocityVector = velocity;
 		float magnitudeFactor = 1f;
-		if(clipVector!=Vector3.zero && oldVelocityVector!=Vector3.zero)
-			magnitudeFactor = Mathf.Cos(Vector3.Angle(clipVector, oldVelocityVector)*Mathf.Deg2Rad);
+		if (clipVector != Vector3.zero && oldVelocityVector != Vector3.zero)
+			magnitudeFactor = Mathf.Cos (Vector3.Angle (clipVector, oldVelocityVector) * Mathf.Deg2Rad);
 		if(magnitudeFactor<0f)
 			magnitudeFactor = 0f;
 		magnitudeFactor = magnitudeFactor * clipVector.magnitude;
@@ -357,6 +428,10 @@ public class SphereController : MonoBehaviour {
 	void checkDistances()
 	{
 		bool skipped = false;
+		float checkLength = scalar;
+		if (grounded2)
+			checkLength = checkLength * groundBufferFactor;
+
 		if(!use2dCasts)
 		{
 			distances[0] = returnRayLength(transform.position, directions[0], scalar);
@@ -420,7 +495,9 @@ public class SphereController : MonoBehaviour {
 	int findSmallestDistance()
 	{
 		int smallestIndex = -1;
-		float smallestDistance = 1f;
+		float smallestDistance = scalar;
+		//if (grounded2)
+		//	smallestDistance = smallestDistance * groundBufferFactor;
 		for(int x=0;x<distances.Length;x++)
 		{
 			if(distances[x]<smallestDistance)
@@ -448,6 +525,42 @@ public class SphereController : MonoBehaviour {
 		else return (1f - grip.z) + (grip.z * (gripAngle - grip.x) / gripRange);
 	}
 
+	void moveIntoGroundContact()
+	{
+		// Move down the smallest amount
+		// Distance = returnRayLength - sin(iCos(
+		const int castAmount = 20;
+		float[] arrayOfLengths = new float[castAmount];
+		float distance, factor;
+		Vector3 pos = transform.position-new Vector3(scalar,0f,0f);
+		if(!use2dCasts)
+		{
+			for(int x=0;x<castAmount;x++)
+			{
+				factor = x/(castAmount-1);
+				distance = returnRayLength(pos+new Vector3((scalar*2f)*factor,0f,0f),Vector3.down,scalar*2f);
+				distance = Mathf.Sin (Mathf.Acos(-1f + (2f*factor))) - distance;
+			}
+		}
+		else
+		{
+			for(int x=0;x<castAmount;x++)
+			{
+				factor = x/(castAmount-1);
+				distance = returnRayLength2d(pos+new Vector3((scalar*2f)*factor,0f,0f),Vector3.down,scalar*2f);
+				distance = Mathf.Sin (Mathf.Acos(-1f + (2f*factor))) - distance;
+			}
+		}
+		// Find lowest distance
+		distance = arrayOfLengths [0];
+		for(int x=0;x<castAmount;x++)
+		{
+			if(arrayOfLengths[x]<distance)
+				distance = arrayOfLengths[x];
+		}
+		transform.position += new Vector3(0f, -distance, 0f);
+	}
+
 	Platformer.Jump getJump()
 	{
 		return jumpset.jumps [nextJumpIndex];
@@ -472,10 +585,13 @@ public class SphereController : MonoBehaviour {
 	public void die(string cause = "none")
 	{
 		// Do death stuff
-		GameObject.Find ("GameManager").GetComponent<DelayedRespawn> ().activate ();
-
-		// Despawn
-		despawn ();
+		if(GameObject.Find("GameManager"))
+		{
+			GameObject.Find ("GameManager").GetComponent<DelayedRespawn> ().activate ();
+			// Despawn
+			despawn ();
+		}
+		else transform.position = spawnPosition;
 	}
 
 	public void despawn()
@@ -527,28 +643,24 @@ public class SphereController : MonoBehaviour {
 		if(command=="walk")
 		{
 			animRef.SetBool("walking", true);
-			animRef.SetBool("idle", false);
 			animRef.SetBool("jumping", false);
 			animRef.SetBool("flying", false);
 		}
 		else if(command=="idle")
 		{
 			animRef.SetBool("walking", false);
-			animRef.SetBool("idle", true);
 			animRef.SetBool("jumping", false);
 			animRef.SetBool("flying", false);
 		}
 		else if(command=="fly")
 		{
 			animRef.SetBool("walking", false);
-			animRef.SetBool("idle", false);
 			animRef.SetBool("jumping", false);
 			animRef.SetBool("flying", true);
 		}
 		else if(command=="jump")
 		{
 			animRef.SetBool("walking", false);
-			animRef.SetBool("idle", false);
 			animRef.SetBool("jumping", true);
 			animRef.SetBool("flying", false);
 

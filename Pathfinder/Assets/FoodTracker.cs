@@ -10,7 +10,13 @@ public class FoodTracker : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 		DontDestroyOnLoad (gameObject);
-		id = GameObject.Find ("GameManager").GetComponent<GameManager> ().freshID ();
+		if (GameObject.Find ("GameManager"))
+			id = GameObject.Find ("GameManager").GetComponent<GameManager> ().freshID ();
+		else if(GameObject.Find ("PlayerCharacter"))
+		{
+			GameObject.Find ("CameraHolder").GetComponent<CameraFollow> ().newFollow (GameObject.Find ("PlayerCharacter"));
+			return;
+		}
 		name = "FoodTracker" + Application.loadedLevelName;
 		bool shouldDestroy = false;
 		GameObject[] allFoodTrackers = GameObject.FindGameObjectsWithTag("FoodTracker");
