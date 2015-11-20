@@ -8,7 +8,7 @@ public class CastLight : MonoBehaviour {
 	public Color colorToShade;
 	public float maxDistance;
 	// Use this for initialization
-	Renderer colRenderer;
+	public Renderer[] colRenderers;
 	GameObject player;
 	void Start () {
 		maxDistance = GetComponent<CircleCollider2D> ().radius;
@@ -23,9 +23,11 @@ public class CastLight : MonoBehaviour {
 	void OnTriggerStay2D (Collider2D col) {
 		if (col.tag == "Player") {
 			float distance = Vector3.Distance (transform.position, col.transform.position);
-			if (col.GetComponent<SpriteRenderer> () != null)
-				colRenderer = col.GetComponent<SpriteRenderer> ();
-			colRenderer.material.color = Color.Lerp (colorToShade, Color.white, distance/maxDistance);
+			if (col.GetComponent<SpriteRenderer> () == null)
+				colRenderers = col.gameObject.GetComponentsInChildren<SpriteRenderer>();
+			foreach (SpriteRenderer colRenderer in colRenderers) {
+				colRenderer.material.color = Color.Lerp (colorToShade, Color.white, distance/maxDistance);
+			}
 			prevDist = distance;
 
 		}
