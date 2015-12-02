@@ -3,71 +3,76 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class SphereController : MonoBehaviour {
-
-    public bool use2dCasts;
-
+	
+	public bool use2dCasts;
+	
 	public Animator animRef;
+	
+	public float angleIncrement;
+	public float scalar;
+	public Vector3 grip;
+	public float gravity;
+	public LayerMask layers;
+	
+	public float walkVelocity = 10f;
+	public float flightVelocity = 10f;
+	public Platformer.Acceleration acceleration;
+	public Platformer.Acceleration airControl;
 
-    public float angleIncrement;
-    public float scalar;
-    public Vector3 grip;
-    public float gravity;
-    public LayerMask layers;
+	public float debugHorThrottle;
 
-    public float walkVelocity = 10f;
-    public float flightVelocity = 10f;
-    public Platformer.Acceleration acceleration;
-    public Platformer.Acceleration airControl;
-
-    public Vector3 velocity = Vector3.zero;
-    public Vector3 desiredVelocity;
+	public Vector3 velocity = Vector3.zero;
+	public Vector3 desiredVelocity;
 	public float thegrip;
 	public Vector3 startPos;
-    int lastSmallestIndex = -1;
-
-    bool applyGravity = true;
-    bool grounded1 = false;
-    bool grounded2 = false;
-
-    int spacebar = 0;
-    int spacebarSet = 7;
-    int spacebarDown = 0;
-    int spacebarDownSet = 7;
-
-    float hovertime = 0f;
-
-    public Platformer.AnalogStick horStick;
-    public Platformer.AnalogStick verStick;
-    public Platformer.Jumpset jumpset;
-    int nextJumpIndex = 9999;
-    Platformer.Jump currentJump;
-    bool jumping = false;
-    float currentJumpTime;
-
-    float frameTime;
-    float fps = 60f;
-    public float timeCount = 0f;
-
-    int casts;
-    Vector3[] directions;
-    float[] distances;
-    float[] angles;
+	int lastSmallestIndex = -1;
+	
+	bool applyGravity = true;
+	bool grounded1 = false;
+	bool grounded2 = false;
+	
+	int spacebar = 0;
+	int spacebarSet = 7;
+	int spacebarDown = 0;
+	int spacebarDownSet = 7;
+	
+	float hovertime = 0f;
+	
+	public Platformer.AnalogStick horStick;
+	public Platformer.AnalogStick verStick;
+	public Platformer.Jumpset jumpset;
+	int nextJumpIndex = 9999;
+	Platformer.Jump currentJump;
+	bool jumping = false;
+	float currentJumpTime;
+	
+	float frameTime;
+	float fps = 60f;
+	public float timeCount = 0f;
+	
+	int casts;
+	Vector3[] directions;
+	float[] distances;
+	float[] angles;
 	const float groundBufferFactor = 1.005f;
-    public bool debugBreakOnFall = false;
-    public bool active = true;
+	public bool debugBreakOnFall = false;
+	public bool active = true;
 	Vector3 scale;
 	Vector3 spawnPosition;
-
+	
 	public CameraFollow camRef;
-    
+	
+	int frameNumber = 0;
+	int count = 0;
+	
 	// Use this for initialization
 	void Awake() {
 		spawnPosition = transform.position;
 		scale = transform.localScale;
 		animRef = GetComponentInChildren<Animator> ();
-
+		
 		frameTime = 1f / fps;
-
+		
 		casts = Mathf.RoundToInt(360f / angleIncrement);
 		directions = new Vector3[casts];
 		distances = new float[casts];
@@ -84,14 +89,14 @@ public class SphereController : MonoBehaviour {
 			distances[x] = 0f;
 		}
 	}
-
+	
 	void Update ()
 	{
 		if (spacebar > 0)
 			spacebar += -1;
 		if (spacebarDown > 0)
 			spacebarDown += -1;
-
+		
 		if(active)
 		{
 			if(Input.GetKey(KeyCode.Space))
@@ -99,7 +104,7 @@ public class SphereController : MonoBehaviour {
 			if(Input.GetKeyDown(KeyCode.Space))
 				spacebarDown = spacebarDownSet;
 		}
-
+		
 		frameTime = Time.deltaTime;
 		if (frameTime > 0.034f)
 			frameTime = 0.034f;
@@ -109,174 +114,110 @@ public class SphereController : MonoBehaviour {
 		else if (velocity.x < -0.3f)
 			transform.localScale = new Vector3(-scale.x, scale.y, scale.z);
 	}
-
+	
 	// Update is called once per frame
 	void UpdateCall () {
+		count = 0;
+		frameNumber += 1;
 		//Debug.Log (velocity.magnitude);
 		Vector3 startPosition = transform.position;
 		startPos = startPosition;
 		desiredVelocity = Vector3.zero;
 		float gravityEffect = -gravity * frameTime;
 		float currentGrip;
-
+		
 		float lastGrip = findGrip (lastSmallestIndex);
-
-		/*if(lastGrip>0f)
-		{
-			float hor = horStick.returnThrottle();
-			if(hor<0f)
-				desiredVelocity = new Vector3(Mathf.Cos((angles[lastSmallestIndex]+90f)*Mathf.Deg2Rad),
-				                              Mathf.Sin ((angles[lastSmallestIndex]+90f)*Mathf.Deg2Rad),0f)
-					* hor * walkVelocity;
-			else if(hor>0f)
-				desiredVelocity = new Vector3(Mathf.Cos((angles[lastSmallestIndex]+270f)*Mathf.Deg2Rad),
-				                              Mathf.Sin ((angles[lastSmallestIndex]+270f)*Mathf.Deg2Rad),0f)
-					* -hor * walkVelocity;
-			//if(desiredVelocity!=Vector3.zero)
-			//	Debug.Log(desiredVelocity);
-		}
-		else if(!grounded2)
-		{
-			// Get desired velocity for flying
-			desiredVelocity = new Vector3(horStick.returnThrottle() * 9999f, verStick.returnThrottle() * 9999f, 0f);
-		}*/
-
+		
 		//Debug.Log (desiredVelocity);
-
+		
 		//drawLevel (); 
 		//drawDistances ();
-
+		
 		if(grounded2)
 		{
+			// Bug starts here
 			gameObject.GetComponent<Renderer>().material.color = Color.blue;
 
-			if(velocity.magnitude <(acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * lastGrip * frameTime)
-			   && horStick.returnThrottle()==0f)
-			{
-				velocity = Vector3.zero;
-				Debug.Log ("Fall->Ground vel set to zero");
-			}
-			else if(horStick.returnThrottle()==0f)
-				Debug.Log ("Velmag " + (velocity.magnitude*1000f));
-
-			if(grounded1 &&
-			   lastSmallestIndex!=-1)
-			{ // Ground Glue
-				//if(velocity==Vector3.zero)
-				//	transform.position += new vector3
-				transform.position += ((velocity+(directions[lastSmallestIndex]*velocity.magnitude) + new Vector3(0f,gravityEffect*frameTime,0f)))*frameTime;
-			}
-			else
-			{
-				transform.position += (velocity + new Vector3(0f,-velocity.magnitude + gravityEffect*frameTime,0f))*frameTime;
-			}
-
-			// Desired velocity index
-			int dVIndex = -1;
-
-			// 2 Check grounded
-			checkDistances ();
-			int smallestIndex = findSmallestDistance ();
-			if(smallestIndex==-1)
-				dVIndex = lastSmallestIndex;
-			else dVIndex = smallestIndex;
-
-			float hor = horStick.returnThrottle();
-			bool directionRight = true;
-			if(hor>0f)
-				directionRight = true;
-			else if(hor<0f)
-				directionRight = false;
-			else if(velocity.x>0f)
-				directionRight = true;
-			else if(velocity.x<0f)
-				directionRight = false;
-			// New - Use worst-case (grounded-est) velocity angle
-			if(smallestIndex!=-1 && lastSmallestIndex!=-1) // Must have two case
-			{
-				float si, lsi; // abbreviated, floats for angle comparison
-
-				if(directionRight)
-				{
-					si = angles[smallestIndex] - 180f;
-					lsi = angles[lastSmallestIndex] - 180f;
-				}
-				else
-				{
-					si = 360f - angles[smallestIndex];
-					lsi = 360f - angles[lastSmallestIndex];
-				}
-				if(si>lsi)
-					dVIndex = smallestIndex;
-				else dVIndex = lastSmallestIndex;
-			}
-
-			lastSmallestIndex = smallestIndex;
+			transform.position += velocity * frameTime;
+			//if(velocity.y<0f)
+			//	transform.position += new Vector3(0f, -velocity.magnitude * frameTime, 0f);
+			checkDistances(true);
+			int smallestIndex = findSmallestDistance(true);
 			currentGrip = findGrip(smallestIndex);
-			thegrip = currentGrip;
-			transform.position = startPosition;
-
-			if(dVIndex==-1)
+			if(smallestIndex==-1)
 			{
-
-			}
-			else
-			{
-				if(hor<0f && active)
-					desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
-					                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f)
-						* hor * walkVelocity;
-				else if(hor>0f && active)
-					desiredVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
-					                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f)
-						* -hor * walkVelocity;
-			}
-
-			if(currentGrip>0f)
-			{
-				grounded1 = true;
-				float deltaAngle = Mathf.Abs(Vector3.Angle(desiredVelocity, velocity));
-				if(desiredVelocity!=Vector3.zero && deltaAngle<90f)
-					velocity = Vector3.RotateTowards(velocity, desiredVelocity, (currentGrip*deltaAngle*Mathf.Deg2Rad),0f);
-				else if(desiredVelocity==Vector3.zero)
+				currentGrip = 0f;
+				float groundContactBonus = Mathf.Abs(gravityEffect);
+				if(velocity.y>0f)
+					groundContactBonus += velocity.y*frameTime;
+				if(moveIntoGroundContact(velocity.magnitude*frameTime + groundContactBonus))
 				{
-					if(velocity.magnitude<(acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime))
+					checkDistances(true);
+					smallestIndex = findSmallestDistance(true);
+					currentGrip = findGrip(smallestIndex);
+					if(currentGrip>0f)
 					{
-						if(velocity!=Vector3.zero)
-							Debug.Log ("GroundContact");
-						velocity = Vector3.zero;
-						moveIntoGroundContact();
+						
 					}
 					else
 					{
-						Debug.Log ("--Magn: " + velocity.magnitude);
-						Debug.Log ((acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime) + "--");
-						Vector3 expectedVelocity = velocity;
-						if(velocity.x>0f)
-							expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+90f)*Mathf.Deg2Rad),
-							                              Mathf.Sin ((angles[dVIndex]+90f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
-						else if(velocity.x<0f)
-							expectedVelocity = new Vector3(Mathf.Cos((angles[dVIndex]+270f)*Mathf.Deg2Rad),
-							                              Mathf.Sin ((angles[dVIndex]+270f)*Mathf.Deg2Rad),0f) * velocity.magnitude;
-						deltaAngle = Mathf.Abs (Vector3.Angle(expectedVelocity, velocity));
-						Vector3 oldVel = velocity;
-						velocity = Vector3.RotateTowards(velocity, expectedVelocity, (currentGrip*deltaAngle*Mathf.Deg2Rad),0f);
-						if(velocity!=Vector3.zero || oldVel!=Vector3.zero)
-							Debug.Log (oldVel + " " + velocity);
+						grounded2 = false;
+						transform.position = startPosition + (velocity * frameTime);
+					}
+				}
+				else
+				{
+					grounded2 = false;
+				}
+			}
+			
+			if(currentGrip==0f && smallestIndex!=-1)
+			{
+				// Mightve hit a wall, try to find ground?
+				Debug.Log ("wall");
+				clip (smallestIndex, currentGrip);
+				Vector3 storedPosition = transform.position;
+
+				float groundContactBonus = Mathf.Abs(gravityEffect);
+				if(velocity.y>0f)
+					groundContactBonus += velocity.y*frameTime;
+				if(moveIntoGroundContact(velocity.magnitude*groundBufferFactor + groundContactBonus))
+				{
+					checkDistances(true);
+					smallestIndex = findSmallestDistance(true);
+					currentGrip = findGrip(smallestIndex);
+					if(currentGrip>0f)
+					{
+						
+					}
+					else
+					{
+						grounded2 = false;
+						transform.position = storedPosition;
 					}
 				}
 			}
-			else if(grounded1==false)
+			
+			if(currentGrip>0f)
 			{
-				grounded2 = false;
+				float horThrottle = debugHorThrottle;
+				if(horThrottle==0f)
+					desiredVelocity = Vector3.zero;
+				else
+					desiredVelocity = returnTangent(smallestIndex) * horThrottle * walkVelocity;
+				Vector3 a,b;
+				if(desiredVelocity!=Vector3.zero)
+				{
+					a = velocity.normalized;
+					b = desiredVelocity.normalized;
+					velocity = Vector3.Dot(a,b) * b * velocity.magnitude;
+				}
+				velocity = Vector3.MoveTowards (velocity, desiredVelocity, acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime);
 			}
-			else 
-			{	
-				grounded1 = false;
-				if(velocity.y>0f)
-					velocity.y = gravityEffect;
-			}
+			else grounded2 = false;
 
+			clip ();
+			
 			if(spacebarDown>0 && grounded2 && nextJumpIndex<jumpset.Length())
 			{
 				// Jumping here
@@ -294,18 +235,14 @@ public class SphereController : MonoBehaviour {
 				spacebarDown = 0;
 				animSet("jump");
 			}
-			// Apply translation from velocity
-			transform.position += velocity * frameTime;
 
-			clip ();
-			clipVelocity(startPosition);
-			velocity = Vector3.MoveTowards (velocity, desiredVelocity, acceleration.lerpStrength (Vector3.Distance (velocity, desiredVelocity)) * currentGrip * frameTime);
+			//clipVelocity(startPosition, currentGrip);
 			if(velocity.magnitude>0.2f && grounded2)
 				animSet("walk");
 			else if (grounded2)
 				animSet("idle");
-
-			// Special case for ground jitter?
+			GetComponent<logValues>().addValue(Vector3.Distance(transform.position,startPos)/frameTime);
+			// Bug ends here
 		}
 		else // Not grounded // Falling
 		{
@@ -314,19 +251,19 @@ public class SphereController : MonoBehaviour {
 			gameObject.GetComponent<Renderer>().material.color = Color.red;
 			if(!(jumping && currentJump.hover))
 				velocity.y += gravityEffect;
-
+			
 			desiredVelocity = new Vector3(horStick.returnThrottle() * flightVelocity, verStick.returnThrottle() * flightVelocity, 0f);
 			if(!active)
 				desiredVelocity = velocity;
-
-
+			
+			
 			if(jumping)
 			{
 				if(spacebar>0)
 				{
 					if(currentJump.applyOverTime)
 						applyFly(desiredVelocity);
-	
+					
 					currentJumpTime += -frameTime;
 					if(currentJumpTime<0f)
 						jumping = false;
@@ -338,20 +275,22 @@ public class SphereController : MonoBehaviour {
 				desiredVelocity = velocity;
 				if(horStick.returnThrottle()!=0f)
 					desiredVelocity.x = horStick.returnThrottle() * walkVelocity;
+				//Debug.Log (2 + " " + velocity);
 				velocity = Vector3.MoveTowards(velocity, desiredVelocity, airControl.lerpStrength(Vector3.Distance(velocity, desiredVelocity)) * frameTime);
+				//Debug.Log (2 + " " + velocity);
 			}
-
+			
 			// 1 Apply X,Y simultaneously
 			transform.position += velocity * frameTime;
-
+			
 			// 2 Check distances, see if grounded.
 			checkDistances ();
 			int smallestIndex = findSmallestDistance ();
 			lastSmallestIndex = smallestIndex;
 			currentGrip = findGrip(smallestIndex);
-
+			// This might be an issue, clipping before grip is found & applied
 			clip(smallestIndex, 1f);
-
+			
 			// 3 If grip > 0f, is grounded again
 			if(currentGrip>0f)
 			{
@@ -361,7 +300,7 @@ public class SphereController : MonoBehaviour {
 				jumping = false;
 				// Apply grip to velocity
 			}
-
+			
 			if(!grounded2 && !jumping && spacebarDown>0 && nextJumpIndex<jumpset.Length())
 			{
 				// Flying here
@@ -372,11 +311,13 @@ public class SphereController : MonoBehaviour {
 				jumping = true;
 				animSet("fly");
 			}
-
-			clipVelocity(startPosition);
+			//Debug.Log (3 + " " + velocity);
+			clipVelocity(startPosition, currentGrip);
+			//Debug.Log (3 + " " + velocity);
 		}
+		//Debug.Log ("End" + frameNumber);
 	}
-
+	
 	void applyFly(Vector3 desiredVelocity)
 	{
 		if(currentJump.applyOverTime)
@@ -388,7 +329,7 @@ public class SphereController : MonoBehaviour {
 			velocity = Vector3.MoveTowards (velocity, mod * desiredVelocity, currentJump.timeAcceleration.lerpStrength(Vector3.Distance(velocity, desiredVelocity)) * frameTime);
 		}
 	}
-
+	
 	void clip(int smallestIndex, float mag = 1f)
 	{
 		if(smallestIndex!=-1)
@@ -403,82 +344,99 @@ public class SphereController : MonoBehaviour {
 			}*/
 		}
 	}
-
+	
 	void clip(float mag = 1f)
 	{
 		checkDistances ();
 		clip (findSmallestDistance (), mag);
 	}
-
-	void clipVelocity(Vector3 startPosition)
+	
+	void clipVelocity(Vector3 startPosition, float currentGrip)
 	{
 		Vector3 clipPosition = transform.position;
 		Vector3 clipVector = (clipPosition - startPosition) / frameTime;
 		Vector3 oldVelocityVector = velocity;
 		float magnitudeFactor = 1f;
-		if (clipVector != Vector3.zero && oldVelocityVector != Vector3.zero)
-			magnitudeFactor = Mathf.Cos (Vector3.Angle (clipVector, oldVelocityVector) * Mathf.Deg2Rad);
+		if (currentGrip <= 0f) 
+		{
+			if (clipVector != Vector3.zero && oldVelocityVector != Vector3.zero)
+				magnitudeFactor = Mathf.Cos (Vector3.Angle (clipVector, oldVelocityVector) * Mathf.Deg2Rad);
+		}
+		else
+		{
+			Vector3 groundVector = returnTangent(lastSmallestIndex);
+			if (clipVector != Vector3.zero && oldVelocityVector != Vector3.zero)
+			{
+				float tangentAngle = Vector3.Angle (oldVelocityVector, groundVector);
+				if(Mathf.Abs(tangentAngle)>90f)
+				{
+					groundVector = -groundVector;
+					tangentAngle = Vector3.Angle(oldVelocityVector, groundVector);
+				}
+				magnitudeFactor = oldVelocityVector.magnitude * Mathf.Cos(tangentAngle * Mathf.Deg2Rad) / clipVector.magnitude;
+			}
+		}
 		if(magnitudeFactor<0f)
 			magnitudeFactor = 0f;
-		magnitudeFactor = magnitudeFactor * clipVector.magnitude;
-		clipVector.Normalize ();
+		//magnitudeFactor = magnitudeFactor * clipVector.magnitude;
+		//clipVector.Normalize ();
 		velocity = magnitudeFactor * clipVector;
 	}
 	
-	void checkDistances()
+	void checkDistances(bool addBuffer = false)
 	{
 		bool skipped = false;
 		float checkLength = scalar;
-		if (grounded2)
+		if (addBuffer)
 			checkLength = checkLength * groundBufferFactor;
-
+		
 		if(!use2dCasts)
 		{
-			distances[0] = returnRayLength(transform.position, directions[0], scalar);
-
+			distances[0] = returnRayLength(transform.position, directions[0], checkLength);
+			
 			for(int x=1;x<casts;x++)
 			{
-				distances[x] = returnRayLength(transform.position, directions[x], scalar);
-				if(distances[x]==scalar)
+				distances[x] = returnRayLength(transform.position, directions[x], checkLength);
+				if(distances[x]==checkLength)
 				{
 					skipped = true;
 					x++;
 					if(x<casts)
-						distances[x] = scalar;
+						distances[x] = checkLength;
 				}
 				else
 				{
 					if(skipped)
-						distances[x-1] = returnRayLength(transform.position, directions[x-1], scalar);
+						distances[x-1] = returnRayLength(transform.position, directions[x-1], checkLength);
 					skipped = false;
 				}
 			}
 		}
 		else
 		{
-			distances[0] = returnRayLength2d(transform.position, directions[0], scalar);
+			distances[0] = returnRayLength2d(transform.position, directions[0], checkLength);
 			
 			for(int x=1;x<casts;x++)
 			{
-				distances[x] = returnRayLength2d(transform.position, directions[x], scalar);
-				if(distances[x]==scalar)
+				distances[x] = returnRayLength2d(transform.position, directions[x], checkLength);
+				if(distances[x]==checkLength)
 				{
 					skipped = true;
 					x++;
 					if(x<casts)
-						distances[x] = scalar;
+						distances[x] = checkLength;
 				}
 				else
 				{
 					if(skipped)
-						distances[x-1] = returnRayLength2d(transform.position, directions[x-1], scalar);
+						distances[x-1] = returnRayLength2d(transform.position, directions[x-1], checkLength);
 					skipped = false;
 				}
 			}
 		}
 		deathCheck ();
 	}
-
+	
 	void deathCheck()
 	{
 		RaycastHit hit;
@@ -492,12 +450,12 @@ public class SphereController : MonoBehaviour {
 		}
 	}
 	
-	int findSmallestDistance()
+	int findSmallestDistance(bool addBuffer = false)
 	{
 		int smallestIndex = -1;
 		float smallestDistance = scalar;
-		//if (grounded2)
-		//	smallestDistance = smallestDistance * groundBufferFactor;
+		if (addBuffer)
+			smallestDistance = smallestDistance * groundBufferFactor;
 		for(int x=0;x<distances.Length;x++)
 		{
 			if(distances[x]<smallestDistance)
@@ -517,38 +475,52 @@ public class SphereController : MonoBehaviour {
 		else
 			gripAngle = Mathf.Abs(Mathf.DeltaAngle (angles [theIndex], 270f));
 		float gripRange = grip.y - grip.x;
-
+		
 		if (gripAngle < grip.x)
 			return 1.0f;
 		if (gripAngle > grip.y)
 			return 0f;
 		else return (1f - grip.z) + (grip.z * (gripAngle - grip.x) / gripRange);
 	}
-
-	void moveIntoGroundContact()
+	
+	bool moveIntoGroundContact(float largestDistance = 999f)
 	{
 		// Move down the smallest amount
 		// Distance = returnRayLength - sin(iCos(
-		const int castAmount = 20;
+		const int castAmount = 15;
 		float[] arrayOfLengths = new float[castAmount];
-		float distance, factor;
+		float distance, factor, circleChord;
 		Vector3 pos = transform.position-new Vector3(scalar,0f,0f);
 		if(!use2dCasts)
 		{
 			for(int x=0;x<castAmount;x++)
 			{
-				factor = x/(castAmount-1);
-				distance = returnRayLength(pos+new Vector3((scalar*2f)*factor,0f,0f),Vector3.down,scalar*2f);
-				distance = Mathf.Sin (Mathf.Acos(-1f + (2f*factor))) - distance;
+				factor = (x*1f)/((castAmount-1)*1f);
+				circleChord = scalar*Mathf.Sin (Mathf.Acos((2f*factor)-1f));
+				distance = returnRayLength(pos+new Vector3(2f*scalar*factor,0f,0f),Vector3.down,largestDistance+circleChord);
+				if(distance==0f)
+				{
+					arrayOfLengths[x] = largestDistance;
+					continue;
+				}
+				distance = distance - circleChord;
+				arrayOfLengths[x] = distance;
 			}
 		}
 		else
 		{
 			for(int x=0;x<castAmount;x++)
 			{
-				factor = x/(castAmount-1);
-				distance = returnRayLength2d(pos+new Vector3((scalar*2f)*factor,0f,0f),Vector3.down,scalar*2f);
-				distance = Mathf.Sin (Mathf.Acos(-1f + (2f*factor))) - distance;
+				factor = (x*1f)/((castAmount-1)*1f);
+				circleChord = scalar*Mathf.Sin (Mathf.Acos((2f*factor)-1f));
+				distance = returnRayLength2d(pos+new Vector3(2f*scalar*factor,0f,0f),Vector3.down,largestDistance+circleChord);
+				if(distance==0f)
+				{
+					arrayOfLengths[x] = largestDistance;
+					continue;
+				}
+				distance = distance - circleChord;
+				arrayOfLengths[x] = distance;
 			}
 		}
 		// Find lowest distance
@@ -558,14 +530,19 @@ public class SphereController : MonoBehaviour {
 			if(arrayOfLengths[x]<distance)
 				distance = arrayOfLengths[x];
 		}
-		transform.position += new Vector3(0f, -distance, 0f);
+		if(distance<largestDistance)
+		{
+			transform.position += new Vector3(0f, -distance, 0f);
+			return true;
+		}
+		return false;
 	}
-
+	
 	Platformer.Jump getJump()
 	{
 		return jumpset.jumps [nextJumpIndex];
 	}
-
+	
 	public Vector3 returnTangent(int index)
 	{
 		if (index == -1)
@@ -573,15 +550,16 @@ public class SphereController : MonoBehaviour {
 		else
 			return returnTangent (angles [index]);
 	}
-
+	
 	public Vector3 returnTangent(float angle)
 	{
+		return Vector3.right;
 		Vector3 toReturn = new Vector3 (Mathf.Cos ((angle + 90f) * Mathf.Deg2Rad), Mathf.Sin ((angle + 90f) * Mathf.Deg2Rad), 0f);
 		if (toReturn.x < 0f)
 			toReturn = toReturn * -1f;
 		return toReturn;
 	}
-
+	
 	public void die(string cause = "none")
 	{
 		// Do death stuff
@@ -593,12 +571,12 @@ public class SphereController : MonoBehaviour {
 		}
 		else transform.position = spawnPosition;
 	}
-
+	
 	public void despawn()
 	{
 		GameObject.Destroy (gameObject);
 	}
-
+	
 	public float returnRayLength(Vector3 position, Vector3 direction, float length = 9999f)
 	{
 		RaycastHit hit;
@@ -612,11 +590,11 @@ public class SphereController : MonoBehaviour {
 		}
 		return length;
 	}
-
+	
 	public float returnRayLength2d(Vector2 position, Vector2 direction, float length = 9999f)
 	{
 		RaycastHit2D hit = Physics2D.Raycast(position, direction, length, layers);
-
+		
 		if(hit)
 		{
 			hitCondition2D(hit.collider, 0f);
@@ -625,19 +603,19 @@ public class SphereController : MonoBehaviour {
 		return length;
 		//return Physics2D.Raycast(position, direction, length, layers).distance;
 	}
-
-    void hitCondition2D(Collider2D other, float force = 0f) // Object was hit, here is the collider
-    {
-        // Jake, here
-        // Ignore the force variable
-    }
-
+	
+	void hitCondition2D(Collider2D other, float force = 0f) // Object was hit, here is the collider
+	{
+		// Jake, here
+		// Ignore the force variable
+	}
+	
 	void hitCondition(Collider other, float force = 0f) // Object was hit, here is the collider
 	{
 		// Jake, here
 		// Ignore the force variable
 	}
-
+	
 	void animSet(string command)
 	{
 		if(command=="walk")
@@ -663,10 +641,10 @@ public class SphereController : MonoBehaviour {
 			animRef.SetBool("walking", false);
 			animRef.SetBool("jumping", true);
 			animRef.SetBool("flying", false);
-
+			
 		}
 	}
-
+	
 	public void drawLevel()
 	{
 		if (lastSmallestIndex != -1) 
@@ -674,13 +652,13 @@ public class SphereController : MonoBehaviour {
 			int newIndex = lastSmallestIndex + directions.Length/2;
 			if(newIndex>directions.Length)
 				newIndex = newIndex - directions.Length;
-
-
+			
+			
 			Debug.DrawLine (transform.position + (5f * directions [newIndex]),
-			               transform.position + (-5f * directions [newIndex]), Color.blue);
+			                transform.position + (-5f * directions [newIndex]), Color.blue);
 		}
 	}
-
+	
 	public void drawDistances()
 	{
 		for(int x=0;x<distances.Length;x++)
@@ -689,5 +667,11 @@ public class SphereController : MonoBehaviour {
 			               transform.position + (distances[x] * directions[x]) * 2f,
 			               new Color(1f - (distances[x]/scalar), 0f, (distances[x]/scalar)),0f,false);
 		}
+	}
+
+	void logVel()
+	{
+		count++;
+		Debug.Log (count + " " + velocity);
 	}
 }
