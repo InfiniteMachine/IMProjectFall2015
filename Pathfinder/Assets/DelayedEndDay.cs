@@ -21,7 +21,7 @@ public class DelayedEndDay : MonoBehaviour {
 				activated = false;
 				// Do what when activated
 				GameObject.Find ("GameManager").GetComponent<GameManager>().setCheckpoint();
-				Application.LoadLevel("TestScene");
+				Application.LoadLevel("TechTree");
 			}
 		}
 	}

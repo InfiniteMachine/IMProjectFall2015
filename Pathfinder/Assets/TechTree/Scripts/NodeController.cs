@@ -78,6 +78,16 @@ public class NodeController : MonoBehaviour {
         return names[location - (hasCenter ? 0 : 1)];
     }
 
+    public int GetNameLength()
+    {
+        return names.Count;
+    }
+
+    public List<string> GetNames()
+    {
+        return names;
+    }
+
     public bool IsSkillActive(string name)
     {
         int location = names.IndexOf(name);
@@ -113,7 +123,7 @@ public class NodeController : MonoBehaviour {
     public void SetActive(string name, bool active)
     {
         int location = names.IndexOf(name);
-        if (location != -1)
+        if (location == -1)
             return;
         nodes[location].SetActive(active);
     }

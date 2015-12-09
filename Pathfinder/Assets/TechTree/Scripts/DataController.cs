@@ -14,9 +14,9 @@ public class DataController : MonoBehaviour {
     public Color normal2Digging = new Color(222f / 255f, 120f / 255f, 0f);
     public float lineWidth = 2;
 
-    public float flyingFruit = 1;
-    public float diggingFruit = 5;
-    public float normalFriut = 2;
+    private float flyingFruit = 2;
+    private float diggingFruit = 5;
+    private float normalFriut = 2;
 
 	// Use this for initialization
 	void Start () {
@@ -59,7 +59,7 @@ public class DataController : MonoBehaviour {
         rTrans.position = normalTree.transform.position;
         rTrans.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(differenceVector.y, differenceVector.x) * Mathf.Rad2Deg);
 
-        InvokeNextFrame(InitializeMenu);
+        //InvokeNextFrame(InitializeMenu);
 	}
 	
 	// Update is called once per frame
@@ -168,26 +168,32 @@ public class DataController : MonoBehaviour {
         }
     }
 
-    public void InitializeMenu()
+    public void InitializeMenu(int nFruit, int dFruit, int fFruit)
     {
+        normalFriut = nFruit;
+        diggingFruit = dFruit;
+        flyingFruit = fFruit;
         for (int i = 1; i < 8; i++)
         {
             flyingTree.HideSkill(flyingTree.GetName(i), true);
             diggingTree.HideSkill(diggingTree.GetName(i), true);
         }
-        if (normalFriut <= 0)
+        for (int i = 1; i <= 4; i++)
         {
-            for (int i = 1; i <= 4; i++)
-            {
-                normalTree.SetSkillState(normalTree.GetName(i), false);
-            }
+            normalTree.SetSkillState(normalTree.GetName(i), false);
         }
-
     }
 
-    public void UpdateMenu()
+    public void UpdateMenu(Dictionary<string, bool> normal, Dictionary<string, bool> flying, Dictionary<string, bool> digging, int nFruit, int fFruit, int dFruit)
     {
+        normalFriut = nFruit;
+        flyingFruit = fFruit;
+        diggingFruit = dFruit;
         //UpdateNormal
+        foreach (KeyValuePair<string, bool> pair in normal)
+        {
+            normalTree.SetActive(pair.Key, pair.Value);
+        }
         if (normalFriut > 0)
         {
             for (int i = 1; i <= 4; i++)
@@ -196,9 +202,78 @@ public class DataController : MonoBehaviour {
             }
         }
         //UpdateFlying
-        if (flyingFruit > 0)
+        List<string> names = flyingTree.GetNames();
+        if (flying[names[0]])
         {
-            
+            flyingTree.SetActive(names[0], true);
+        }
+        bool broken = false;
+        for(int i = 1; i <= 7; i++)
+        {
+            flyingTree.HideSkill(names[i], true);
+        }
+        for (int i = 1; i < 7 && !broken; i+=2)
+        {
+            flyingTree.ShowSkill(names[i], true);
+            flyingTree.ShowSkill(names[i + 1], true);
+            if (flying[names[i]] || flying[names[i + 1]])
+            {
+                flyingTree.SetActive(names[i], flying[names[i]]);
+                flyingTree.SetSkillState(names[i], flying[names[i]]);
+                flyingTree.SetActive(names[i + 1], flying[names[i + 1]]);
+                flyingTree.SetSkillState(names[i + 1], flying[names[i + 1]]);
+            }
+            else
+            {
+                flyingTree.SetSkillState(names[i], flyingFruit > 0);
+                flyingTree.SetSkillState(names[i + 1], flyingFruit > 0);
+                broken = true;
+            }
+        }
+        if (!broken)
+        {
+            flyingTree.ShowSkill(names[7], true);
+            if (flying[names[7]])
+                flyingTree.SetActive(names[7], true);
+            else
+                flyingTree.SetSkillState(names[7], flyingFruit > 0);
+        }
+        //UpdateDigging
+        names = diggingTree.GetNames();
+        if (digging[names[0]])
+        {
+            diggingTree.SetActive(names[0], true);
+        }
+        broken = false;
+        for (int i = 1; i <= 7; i++)
+        {
+            diggingTree.HideSkill(names[i], true);
+        }
+        for (int i = 1; i < 7 && !broken; i += 2)
+        {
+            diggingTree.ShowSkill(names[i], true);
+            diggingTree.ShowSkill(names[i + 1], true);
+            if (digging[names[i]] || digging[names[i + 1]])
+            {
+                diggingTree.SetActive(names[i], digging[names[i]]);
+                diggingTree.SetSkillState(names[i], digging[names[i]]);
+                diggingTree.SetActive(names[i + 1], digging[names[i + 1]]);
+                diggingTree.SetSkillState(names[i + 1], digging[names[i + 1]]);
+            }
+            else
+            {
+                diggingTree.SetSkillState(names[i], diggingFruit > 0);
+                diggingTree.SetSkillState(names[i + 1], diggingFruit > 0);
+                broken = true;
+            }
+        }
+        if (!broken)
+        {
+            diggingTree.ShowSkill(names[7], true);
+            if (digging[names[7]])
+                diggingTree.SetActive(names[7], true);
+            else
+                diggingTree.SetSkillState(names[7], diggingFruit > 0);
         }
     }
 
@@ -224,6 +299,8 @@ public class DataController : MonoBehaviour {
 
     public void CloseTree()
     {
-        GameObject.Find("GameManager").GetComponent<GameManager>().respawn();
+        GameObject go = GameObject.Find("GameManager");
+        go.GetComponent<UpgradeStorage>().CloseTechTree();
+        go.GetComponent<GameManager>().respawn();
     }
 }
