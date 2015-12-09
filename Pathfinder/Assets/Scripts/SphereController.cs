@@ -221,7 +221,7 @@ public class SphereController : MonoBehaviour {
 			
 			if(currentGrip>0f)
 			{
-				float horThrottle = debugHorThrottle;
+				float horThrottle = horStick.returnThrottle();
 				if(horThrottle==0f)
 					desiredVelocity = Vector3.zero;
 				else
