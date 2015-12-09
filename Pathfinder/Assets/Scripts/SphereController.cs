@@ -59,12 +59,17 @@ public class SphereController : MonoBehaviour {
 	public bool active = true;
 	Vector3 scale;
 	Vector3 spawnPosition;
-	
+
+	public float globalGrip = 0f;
+
 	public CameraFollow camRef;
 	
 	int frameNumber = 0;
 	int count = 0;
-	
+
+	public int gripIndexMin;
+	public int gripIndexMax;
+
 	// Use this for initialization
 	void Awake() {
 		spawnPosition = transform.position;
@@ -87,6 +92,23 @@ public class SphereController : MonoBehaviour {
 			directions[x] = new Vector3(Mathf.Cos(angle*Mathf.Deg2Rad),
 			                            Mathf.Sin(angle*Mathf.Deg2Rad), 0f);
 			distances[x] = 0f;
+		}
+
+		for(int x=0;x<casts;x++)
+		{
+			if(findGrip(x)>0f)
+			{
+				gripIndexMin = x-1;
+				for(int y=x; y<casts;y++)
+				{
+					if(findGrip(y)==0f)
+					{
+						gripIndexMax = y;
+						break;
+					}
+				}
+				break;
+			}
 		}
 	}
 	
@@ -125,8 +147,10 @@ public class SphereController : MonoBehaviour {
 		desiredVelocity = Vector3.zero;
 		float gravityEffect = -gravity * frameTime;
 		float currentGrip;
+
+		globalGrip = 0f;
 		
-		float lastGrip = findGrip (lastSmallestIndex);
+		//float lastGrip = findGrip (lastSmallestIndex);
 		
 		//Debug.Log (desiredVelocity);
 		
@@ -139,8 +163,6 @@ public class SphereController : MonoBehaviour {
 			gameObject.GetComponent<Renderer>().material.color = Color.blue;
 
 			transform.position += velocity * frameTime;
-			//if(velocity.y<0f)
-			//	transform.position += new Vector3(0f, -velocity.magnitude * frameTime, 0f);
 			checkDistances(true);
 			int smallestIndex = findSmallestDistance(true);
 			currentGrip = findGrip(smallestIndex);
@@ -174,8 +196,7 @@ public class SphereController : MonoBehaviour {
 			if(currentGrip==0f && smallestIndex!=-1)
 			{
 				// Mightve hit a wall, try to find ground?
-				Debug.Log ("wall");
-				clip (smallestIndex, currentGrip);
+				clip (smallestIndex, 1f);
 				Vector3 storedPosition = transform.position;
 
 				float groundContactBonus = Mathf.Abs(gravityEffect);
@@ -185,7 +206,7 @@ public class SphereController : MonoBehaviour {
 				{
 					checkDistances(true);
 					smallestIndex = findSmallestDistance(true);
-					currentGrip = findGrip(smallestIndex);
+					currentGrip = findGrip(smallestIndex, true);
 					if(currentGrip>0f)
 					{
 						
@@ -241,7 +262,8 @@ public class SphereController : MonoBehaviour {
 				animSet("walk");
 			else if (grounded2)
 				animSet("idle");
-			GetComponent<logValues>().addValue(Vector3.Distance(transform.position,startPos)/frameTime);
+			if(GetComponent<logValues>())
+				GetComponent<logValues>().addValue(Vector3.Distance(transform.position,startPos)/frameTime);
 			// Bug ends here
 		}
 		else // Not grounded // Falling
@@ -287,7 +309,7 @@ public class SphereController : MonoBehaviour {
 			checkDistances ();
 			int smallestIndex = findSmallestDistance ();
 			lastSmallestIndex = smallestIndex;
-			currentGrip = findGrip(smallestIndex);
+			currentGrip = findGrip (smallestIndex);
 			// This might be an issue, clipping before grip is found & applied
 			clip(smallestIndex, 1f);
 			
@@ -315,7 +337,6 @@ public class SphereController : MonoBehaviour {
 			clipVelocity(startPosition, currentGrip);
 			//Debug.Log (3 + " " + velocity);
 		}
-		//Debug.Log ("End" + frameNumber);
 	}
 	
 	void applyFly(Vector3 desiredVelocity)
@@ -456,19 +477,46 @@ public class SphereController : MonoBehaviour {
 		float smallestDistance = scalar;
 		if (addBuffer)
 			smallestDistance = smallestDistance * groundBufferFactor;
+		float maximum = smallestDistance;
+		globalGrip = 0f;
+		float a;
 		for(int x=0;x<distances.Length;x++)
 		{
-			if(distances[x]<smallestDistance)
+			if((x>gripIndexMin && x<gripIndexMax) && distances[x]<maximum)
+			{
+				a = findGrip(x);
+				if(a>globalGrip)
+				{
+					globalGrip = a;
+				}
+			}
+
+			if(distances[x]>smallestDistance)
+			{}
+			else if(distances[x]<smallestDistance)
 			{
 				smallestDistance = distances[x];
 				smallestIndex = x;
+			}
+			else if(smallestIndex!=-1)
+			{
+				if(findGrip(x)>findGrip(smallestIndex))
+				{
+					smallestDistance = distances[x];
+					smallestIndex = x;
+				}
 			}
 		}
 		return smallestIndex;
 	}
 	
-	float findGrip(int theIndex)
+	float findGrip(int theIndex, bool mayUseGlobalGrip = false)
 	{
+		if(mayUseGlobalGrip && theIndex>0 && theIndex<(casts/2))
+		{
+			return globalGrip;
+		}
+
 		float gripAngle;
 		if (theIndex == -1)
 			return 0f;
