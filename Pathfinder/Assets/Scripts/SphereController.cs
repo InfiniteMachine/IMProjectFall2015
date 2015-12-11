@@ -67,6 +67,8 @@ public class SphereController : MonoBehaviour {
 	int frameNumber = 0;
 	int count = 0;
 
+	float lastGrip = 0f;
+
 	public int gripIndexMin;
 	public int gripIndexMax;
 
@@ -150,8 +152,6 @@ public class SphereController : MonoBehaviour {
 
 		globalGrip = 0f;
 		
-		//float lastGrip = findGrip (lastSmallestIndex);
-		
 		//Debug.Log (desiredVelocity);
 		
 		//drawLevel (); 
@@ -165,6 +165,7 @@ public class SphereController : MonoBehaviour {
 			transform.position += velocity * frameTime;
 			checkDistances(true);
 			int smallestIndex = findSmallestDistance(true);
+			int slopeSmallestIndex = smallestIndex; // Store for later if necessary
 			currentGrip = findGrip(smallestIndex);
 			if(smallestIndex==-1)
 			{
@@ -209,7 +210,7 @@ public class SphereController : MonoBehaviour {
 					currentGrip = findGrip(smallestIndex, true);
 					if(currentGrip>0f)
 					{
-						
+						grounded2 = true;
 					}
 					else
 					{
@@ -218,10 +219,48 @@ public class SphereController : MonoBehaviour {
 					}
 				}
 			}
+
+			if(currentGrip==0f && slopeSmallestIndex!=-1)
+			{ // Youve probably encountered a slope thats too steep
+				Vector3 storedPosition = transform.position;
+				//Debug.Log ("Steep Slope1");
+				Vector3 normalizedVelocity = Vector3.Normalize(velocity);
+				if((normalizedVelocity.x>0f && directions[slopeSmallestIndex].x>0f)
+					||(normalizedVelocity.x<0f && directions[slopeSmallestIndex].x<0f))
+				{ // Potential wall is in same direction as velocity, good
+					//Debug.Log ("Steep Slope2");
+					if((directions[slopeSmallestIndex].y+1f)>normalizedVelocity.y)
+					{// Its a steep slope
+						transform.position = startPosition;
+						bool groundDidntMove = false;
+						float a = scalar*groundBufferFactor;
+						float b = scalar*groundBufferFactor;
+						if(use2dCasts)
+							b = returnRayLength2d(transform.position, directions[slopeSmallestIndex], a);
+						else
+							b = returnRayLength(transform.position, directions[slopeSmallestIndex], a);
+
+						if(b<a)
+							groundDidntMove = true;
+
+						if(groundDidntMove)
+						{
+							//Debug.Log ("Steep Slope3");
+							velocity = velocity*0.5f;
+							currentGrip = lastGrip;
+							grounded2 = true;
+							smallestIndex = slopeSmallestIndex;
+							//clip (slopeSmallestIndex, 1f);
+						}
+						else transform.position = storedPosition;
+					}
+				}
+			}
 			
 			if(currentGrip>0f)
 			{
 				float horThrottle = horStick.returnThrottle();
+				//float horThrottle = debugHorThrottle;
 				if(horThrottle==0f)
 					desiredVelocity = Vector3.zero;
 				else
@@ -337,6 +376,7 @@ public class SphereController : MonoBehaviour {
 			clipVelocity(startPosition, currentGrip);
 			//Debug.Log (3 + " " + velocity);
 		}
+		lastGrip = currentGrip;
 	}
 	
 	void applyFly(Vector3 desiredVelocity)
@@ -467,7 +507,15 @@ public class SphereController : MonoBehaviour {
 		if (Physics.Raycast(ray, out hit, scalar, layers))
 		{
 			if(hit.collider.tag=="Death")
+			{
 				die ();
+				return;
+			}
+		}
+		if (transform.position.y<-110f)
+		{
+			die ();
+			return;
 		}
 	}
 	
@@ -720,6 +768,6 @@ public class SphereController : MonoBehaviour {
 	void logVel()
 	{
 		count++;
-		Debug.Log (count + " " + velocity);
+		//Debug.Log (count + " " + velocity);
 	}
 }
