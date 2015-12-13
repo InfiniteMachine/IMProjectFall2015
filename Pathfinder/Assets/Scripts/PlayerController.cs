@@ -33,7 +33,7 @@ public class PlayerController : MonoBehaviour {
 	void Start () {
 		playerAni = GetComponentInChildren<Animator> ();
 		playerRigidbody = GetComponent<Rigidbody2D>();
-		sprite = GetComponent<SpriteRenderer>();
+		sprite = GetComponentInChildren<SpriteRenderer>();
 	}
 
 	bool gotFirstFood;
