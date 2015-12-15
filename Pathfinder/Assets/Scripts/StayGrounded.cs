@@ -4,26 +4,15 @@ using System.Collections;
 public class StayGrounded : MonoBehaviour {
 
     public bool stayDown = true;
-
     public float distance = 3f;
     [Range(0f, 1f)]
     public float errorPercentage = 0.8f;
     public Rigidbody2D rBody;
     public CircleCollider2D colider;
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        
-    }
-
-    void FixedUpdate()
+    // Use this for initialization
+    void Start()
     {
-        //if (stayDown && rBody.velocity.y > 0)
-           // rBody.velocity.Set(rBody.velocity.y, -1);
+
     }
 
     void OnCollisionExit2D(Collision2D col)
@@ -43,7 +32,7 @@ public class StayGrounded : MonoBehaviour {
                         vec.x = 0;
                         rBody.MovePosition(transform.position + (Vector3)vec);
                     }
-                    rBody.velocity = new Vector2(rBody.velocity.x, -5f);
+                    rBody.velocity = new Vector2(rBody.velocity.x, Mathf.Min(-5f, rBody.velocity.y));
                 }
             }
         }
