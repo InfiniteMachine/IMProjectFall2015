@@ -2,7 +2,8 @@
 using System.Collections;
 
 public class PlayerController : MonoBehaviour {
-	public Sprite[] movementSprites;
+	public Vector3 leftFaceing = new Vector3(0,180,0);
+	public Vector3 rightFacing = new Vector3(0,0,0);
 
 	public int skillPoints;
 	public float maxSpeed;
@@ -27,16 +28,18 @@ public class PlayerController : MonoBehaviour {
 	GameObject objectToDig;
 	Rigidbody2D playerRigidbody;
 	SpriteRenderer sprite;
-	Animator playerAni;
+	public Animator playerAni;
+	Vector3 cheackPoint;
 
 	// Use this for initialization
 	void Start () {
+		cheackPoint = transform.position;
 		playerAni = GetComponentInChildren<Animator> ();
 		playerRigidbody = GetComponent<Rigidbody2D>();
 		sprite = GetComponentInChildren<SpriteRenderer>();
 	}
 
-	bool gotFirstFood;
+	bool gotFirstFood = true;
 	void FixedUpdate () {
 
 		if (isGrounded) 
@@ -48,8 +51,9 @@ public class PlayerController : MonoBehaviour {
 		// left right movement 
 		// -----------------------------------------------------------------------------------------
 		if (Input.GetKey (KeyCode.A) && !isGroundLeft) {
-			//sprite.sprite = movementSprites[0];
-			//playerAni.SetBool("walking", true);
+			playerAni.SetBool("walking", true);
+
+			transform.localEulerAngles = leftFaceing;
 			leftDown = true;
 			rightDown = false;
 			if (currentSpeed >= -maxSpeed)
@@ -57,8 +61,9 @@ public class PlayerController : MonoBehaviour {
 
 			playerRigidbody.velocity = new Vector2(currentSpeed, playerRigidbody.velocity.y);
 		} else if (Input.GetKey (KeyCode.D) && !isGroundRight) {
-			//sprite.sprite = movementSprites[1];
-			//playerAni.SetBool("walking", true);
+			playerAni.SetBool("walking", true);
+
+			transform.localEulerAngles = rightFacing;
 			rightDown = true;
 			leftDown = false;
 			if (currentSpeed <= maxSpeed)
@@ -67,15 +72,14 @@ public class PlayerController : MonoBehaviour {
 			playerRigidbody.velocity = new Vector2(currentSpeed, playerRigidbody.velocity.y);
 		}
 		else  {
-			//playerAni.SetBool("walking", false);
-			//playerAni.SetBool("Idle", true);
+			playerAni.SetBool("walking", false);
+			playerAni.SetBool("Idle", true);
 
 			if(Mathf.Abs (currentSpeed) > 0.1f){
 				currentSpeed = Mathf.Max (0, Mathf.Abs (currentSpeed) - 0.5f) * ((currentSpeed > 0) ? 1 : -1);
 			}
 			playerRigidbody.velocity = new Vector2(currentSpeed, playerRigidbody.velocity.y);
 		}
-
 		//-------------------------------------------------------------------------------------------
 
 
@@ -84,7 +88,7 @@ public class PlayerController : MonoBehaviour {
 		if (skillPoints > 1) {
 			if (Input.GetKey (KeyCode.Space) && canFly && currentFlightTime > 0f) {
 				//playerAni.SetBool("Flying", true);
-				playerAni.SetBool("jumping", false);
+				//playerAni.SetBool("jumping", false);
 				currentFlightTime -= Time.fixedDeltaTime;
 				playerRigidbody.velocity += new Vector2(0, liftPower);
 				playerRigidbody.gravityScale = 2f;
@@ -102,8 +106,9 @@ public class PlayerController : MonoBehaviour {
 			}
 		}
 		if (gotFirstFood) {
-			if (Input.GetKey (KeyCode.Space) && isGrounded && !jumped) {
-				playerAni.SetBool("jumping", true);
+			if (Input.GetKeyDown (KeyCode.Space) && isGrounded && !jumped) {
+				//playerAni.SetBool("jumping", true);
+				playerAni.SetBool("walking", false);
 				jumped = true;
 				Invoke ("StartFly", .15f);
 				playerRigidbody.velocity = new Vector2 (playerRigidbody.velocity.x, jumpPower);
@@ -153,7 +158,8 @@ public class PlayerController : MonoBehaviour {
 			jumped = false;
 			currentFlightTime = flightTime;
 			currentGlideTime = glideTime;
-			//playerAni.SetBool("jumping", false);
+//			playerAni.SetBool("jumping", false);
+//			playerAni.SetBool("flying", false);
 		}
 
 		if (col.transform.tag == "BreakableTerrain") {
@@ -189,6 +195,10 @@ public class PlayerController : MonoBehaviour {
 				gotFirstFood = true;
 			}
 			Destroy(col.gameObject);
+		}
+
+		if (col.tag == "KillBox") {
+			transform.position = cheackPoint;
 		}
 	}
 
