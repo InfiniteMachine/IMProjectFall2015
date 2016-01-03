@@ -72,12 +72,16 @@ public class SphereController : MonoBehaviour {
 	public int gripIndexMin;
 	public int gripIndexMax;
 
+	HealthEffect healthScript;
+
 	// Use this for initialization
 	void Awake() {
 		spawnPosition = transform.position;
 		scale = transform.localScale;
 		animRef = GetComponentInChildren<Animator> ();
-		
+
+		healthScript = GetComponent<HealthEffect> ();
+
 		frameTime = 1f / fps;
 		
 		casts = Mathf.RoundToInt(360f / angleIncrement);
@@ -731,11 +735,14 @@ public class SphereController : MonoBehaviour {
 		return length;
 		//return Physics2D.Raycast(position, direction, length, layers).distance;
 	}
-	
+
 	void hitCondition2D(Collider2D other, float force = 0f) // Object was hit, here is the collider
 	{
 		// Jake, here
 		// Ignore the force variable
+		if (other.tag == "Bird" && healthScript.canTakeHit) {
+			healthScript.ReduceHealth ();
+		}
 	}
 	
 	void hitCondition(Collider other, float force = 0f) // Object was hit, here is the collider
