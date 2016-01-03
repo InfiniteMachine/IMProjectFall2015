@@ -151,6 +151,8 @@ public class SphereController : MonoBehaviour {
 		float currentGrip;
 
 		globalGrip = 0f;
+
+		int globalSmallestIndex = -1;
 		
 		//Debug.Log (desiredVelocity);
 		
@@ -293,17 +295,16 @@ public class SphereController : MonoBehaviour {
 				nextJumpIndex++;
 				currentGrip = 0f;
 				spacebarDown = 0;
-				animSet("jump");
+				//animSet("jump");
 			}
 
 			//clipVelocity(startPosition, currentGrip);
-			if(velocity.magnitude>0.2f && grounded2)
-				animSet("walk");
-			else if (grounded2)
-				animSet("idle");
+			//animRef.SetBool(grounded2);
+
 			if(GetComponent<logValues>())
 				GetComponent<logValues>().addValue(Vector3.Distance(transform.position,startPos)/frameTime);
 			// Bug ends here
+			globalSmallestIndex = smallestIndex;
 		}
 		else // Not grounded // Falling
 		{
@@ -370,13 +371,44 @@ public class SphereController : MonoBehaviour {
 				nextJumpIndex++;
 				spacebarDown = 0;
 				jumping = true;
-				animSet("fly");
+				//animSet("fly");
 			}
 			//Debug.Log (3 + " " + velocity);
 			clipVelocity(startPosition, currentGrip);
 			//Debug.Log (3 + " " + velocity);
 		}
 		lastGrip = currentGrip;
+
+		// Animation application
+		if(grounded2)
+		{
+			animRef.SetFloat("GroundSpeed", velocity.magnitude);
+
+			if(velocity.magnitude>0.25f && globalSmallestIndex!=-1)
+			{
+				float blendAngle = Mathf.Abs(Mathf.DeltaAngle(270f,angles[globalSmallestIndex]));
+				// when am i going downhill
+				if(velocity.x<0f && angles[globalSmallestIndex]>270f)
+				{blendAngle = -blendAngle;}
+				else if(velocity.x>0f && angles[globalSmallestIndex]<270f)
+				{blendAngle = -blendAngle;}
+
+				if(Mathf.Abs(blendAngle)>45f)
+					blendAngle = 45f * (blendAngle/Mathf.Abs(blendAngle));
+				blendAngle = blendAngle/45f;
+				blendAngle = 0.5f + (0.5f * blendAngle);
+				animRef.SetFloat("BlendWalk", blendAngle);
+			}
+			else animRef.SetFloat("BlendWalk", 0.5f);
+		}
+		else
+		{
+			animRef.SetFloat("GroundSpeed", 0f);
+			// For debug purposes
+			animRef.SetFloat("BlendWalk", 0.5f);
+		}
+		animRef.SetBool("Grounded", grounded2);
+
 	}
 	
 	void applyFly(Vector3 desiredVelocity)
@@ -712,34 +744,35 @@ public class SphereController : MonoBehaviour {
 		// Ignore the force variable
 	}
 	
-	void animSet(string command)
+	/*void animSet(string command)
 	{
 		if(command=="walk")
 		{
-			animRef.SetBool("walking", true);
-			animRef.SetBool("jumping", false);
-			animRef.SetBool("flying", false);
+			animRef.SetBool("Walking", true);
+			animRef.SetBool("Jump", false);
+			animRef.SetBool("Flying", false);
+			animRef.
 		}
 		else if(command=="idle")
 		{
-			animRef.SetBool("walking", false);
-			animRef.SetBool("jumping", false);
-			animRef.SetBool("flying", false);
+			animRef.SetBool("Walking", false);
+			animRef.SetBool("Jump", false);
+			animRef.SetBool("Flying", false);
 		}
 		else if(command=="fly")
 		{
-			animRef.SetBool("walking", false);
-			animRef.SetBool("jumping", false);
-			animRef.SetBool("flying", true);
+			animRef.SetBool("Walking", false);
+			animRef.SetBool("Jump", false);
+			animRef.SetBool("Flying", true);
 		}
 		else if(command=="jump")
 		{
-			animRef.SetBool("walking", false);
-			animRef.SetBool("jumping", true);
-			animRef.SetBool("flying", false);
+			animRef.SetBool("Walking", false);
+			animRef.SetBool("Jump", true);
+			animRef.SetBool("Flying", false);
 			
 		}
-	}
+	}*/
 	
 	public void drawLevel()
 	{

@@ -1,0 +1,223 @@
+fileFormatVersion: 2
+guid: 2549023b18aefe74c905cd7b9a6041e4
+timeCreated: 1447269977
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: head
+    21300002: neck
+    21300004: lowerArmL
+    21300006: upperArmL
+    21300008: tail
+    21300010: body
+    21300012: upperArmR
+    21300014: lowerArmR
+    21300016: thighL
+    21300018: calfL
+    21300020: footL
+    21300022: footR
+    21300024: calfR
+    21300026: thighR
+    21300028: thighR
+    21300030: upperArmL
+    21300032: head
+    21300034: legR
+    21300036: lowerArmL
+    21300038: footR
+    21300040: tail
+    21300042: neck
+    21300044: legL
+    21300046: thighL
+    21300048: body
+    21300050: upperArmR
+    21300052: footL
+    21300054: lowerArmR
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: .25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 8
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: .5, y: .5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: thighR
+      rect:
+        serializedVersion: 2
+        x: 369
+        y: 1160
+        width: 135
+        height: 205
+      alignment: 9
+      pivot: {x: .370570421, y: .755702794}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: upperArmL
+      rect:
+        serializedVersion: 2
+        x: 738
+        y: 1161
+        width: 69
+        height: 88
+      alignment: 9
+      pivot: {x: .475286961, y: .742218018}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: head
+      rect:
+        serializedVersion: 2
+        x: 1165
+        y: 1063
+        width: 232
+        height: 223
+      alignment: 9
+      pivot: {x: .397902906, y: .239284635}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: legR
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 986
+        width: 144
+        height: 162
+      alignment: 9
+      pivot: {x: .70223397, y: .775637805}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: lowerArmL
+      rect:
+        serializedVersion: 2
+        x: 866
+        y: 1064
+        width: 180
+        height: 89
+      alignment: 9
+      pivot: {x: .177002296, y: .717751503}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: footR
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 695
+        width: 111
+        height: 144
+      alignment: 9
+      pivot: {x: .286262721, y: .830459476}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: tail
+      rect:
+        serializedVersion: 2
+        x: 368
+        y: 732
+        width: 469
+        height: 217
+      alignment: 9
+      pivot: {x: .936172724, y: .519846261}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: neck
+      rect:
+        serializedVersion: 2
+        x: 1071
+        y: 707
+        width: 250
+        height: 284
+      alignment: 9
+      pivot: {x: .293281734, y: .386268735}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: legL
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 318
+        width: 91
+        height: 107
+      alignment: 9
+      pivot: {x: .706031024, y: .675223112}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: thighL
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 389
+        width: 155
+        height: 175
+      alignment: 9
+      pivot: {x: .750509322, y: .755161822}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: body
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 112
+        width: 394
+        height: 374
+      alignment: 9
+      pivot: {x: .110725053, y: .162583053}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: upperArmR
+      rect:
+        serializedVersion: 2
+        x: 1185
+        y: 266
+        width: 82
+        height: 161
+      alignment: 9
+      pivot: {x: .571028531, y: .789408624}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: footL
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 38
+        width: 90
+        height: 141
+      alignment: 9
+      pivot: {x: .327426642, y: .802920938}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: lowerArmR
+      rect:
+        serializedVersion: 2
+        x: 1202
+        y: 96
+        width: 205
+        height: 125
+      alignment: 9
+      pivot: {x: .234826952, y: .484469235}
+      border: {x: 0, y: 0, z: 0, w: 0}
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
